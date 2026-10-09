@@ -68,3 +68,4 @@ Wix 요금제를 해지하기 전에 이 사이트가 정상으로 열리는지 
 - 폰트: Pretendard, Geist Mono (둘 다 SIL OFL 1.1, `assets/fonts/LICENSE.txt`).
 - 십자선 커서(마우스 전용)는 `assets/css/cursor.css`와 `assets/js/cursor.js`로 분리돼 있어요. 끄려면 `build.py`에서 이 두 파일을 불러오는 줄(`cursor.css`, `cursor.js`)을 지우고 `python3 build.py`를 다시 실행하세요. 터치 기기에서는 원래도 나타나지 않아요.
 - 레트로 스크롤바(데스크톱 3열 전용)는 `assets/css/scrollbar.css`와 `assets/js/scrollbar.js`로 분리돼 있어요. 끄려면 `build.py`에서 이 두 파일을 불러오는 줄을 지우고 `python3 build.py`를 다시 실행하세요. 모바일에서는 원래 스크롤바를 그대로 써요.
+- **포트폴리오 PDF**(`assets/portfolio/Dasul-Kim-Portfolio.pdf`)는 `portfolio/build_portfolio.py`로 만들어요. 쪽 구성, 캡션, 이미지는 그 파일의 `SPREADS` 목록과 `portfolio/img/`에 있어요. 다시 만들려면 `python3 portfolio/build_portfolio.py` (Python + Pillow, Node + Playwright/Chromium 필요). 사이트의 "Portfolio PDF" 링크는 관리 페이지의 "사이트 정보 → 포트폴리오 PDF 주소"(또는 `content/site.json`의 `portfolio`)에서 바꿀 수 있어요. 새 PDF를 올릴 때는 `assets/portfolio/`에 파일을 넣고 그 경로를 적으면 돼요.

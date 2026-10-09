@@ -32,6 +32,11 @@ SITE_INFO = load("site.json")
 EMAIL = SITE_INFO["email"]
 INSTAGRAM = SITE_INFO["instagram"]
 PORTFOLIO = SITE_INFO["portfolio"]
+
+
+def portfolio_href(rel):
+    """a path like assets/portfolio/x.pdf is relative to the site root; a full https:// link is used as it is"""
+    return PORTFOLIO if re.match(r"^(https?:)?//|^mailto:", PORTFOLIO) else rel + PORTFOLIO.lstrip("/")
 DESC_EN = SITE_INFO["desc_en"]
 DESC_KO = SITE_INFO["desc_ko"]
 
@@ -221,7 +226,7 @@ def build_home():
 </div>"""
     cv_inner = (bilingual_cv(home_only=True) +
                 f'<div class="cv-more m"><a class="u" href="cv/">{L("Full CV →", "이력 전체 보기 →")}</a><br>'
-                f'<a class="u" href="{PORTFOLIO}" target="_blank" rel="noopener">{L("Portfolio PDF ↗", "포트폴리오 PDF ↗")}</a></div>')
+                f'<a class="u" href="{portfolio_href("")}" target="_blank" rel="noopener">{L("Portfolio PDF ↗", "포트폴리오 PDF ↗")}</a></div>')
     right = right_col(cv_inner, "CV", "이력", extra=f'<a class="u" href="cv/">{L("Full", "전체")}</a>')
     write("index.html", page(
         rel="", path="", title_en="Dasul Kim — Media artist", title_ko="김다슬 — 미디어 아티스트",
@@ -307,7 +312,7 @@ def build_statement():
 
 def build_cv():
     rel = "../"
-    mid = (f'<div class="lab"><span class="m">CV</span><span class="m mute"><a class="u" href="{PORTFOLIO}" target="_blank" rel="noopener">{L("Portfolio PDF ↗", "포트폴리오 PDF ↗")}</a></span></div>'
+    mid = (f'<div class="lab"><span class="m">CV</span><span class="m mute"><a class="u" href="{portfolio_href(rel)}" target="_blank" rel="noopener">{L("Portfolio PDF ↗", "포트폴리오 PDF ↗")}</a></span></div>'
            + bilingual_cv())
     write("cv/index.html", page(rel=rel, path="cv/", title_en="CV — Dasul Kim", title_ko="이력 — 김다슬",
                                 desc=DESC_EN, mid=mid, right=side_index(rel, None), current="cv"))

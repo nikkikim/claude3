@@ -314,7 +314,7 @@
       h('div', { class: 'row2' },
         field('이메일', textInput(s, 'email', { type: 'email' })),
         field('인스타그램 주소', textInput(s, 'instagram', { type: 'url' }))),
-      field('포트폴리오 PDF 주소', textInput(s, 'portfolio', { type: 'url' }), 'CV 페이지와 홈 오른쪽에 링크로 나와요.'));
+      field('포트폴리오 PDF 주소', textInput(s, 'portfolio'), 'CV 페이지와 홈 오른쪽에 링크로 나와요. 사이트 안의 파일(assets/portfolio/…pdf)이나 전체 주소(https://…) 모두 쓸 수 있어요.'));
   }
 
   function viewParas(key, title, lead) {
