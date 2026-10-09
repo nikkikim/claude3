@@ -20,7 +20,7 @@ build.py                                                        ← content/ 를
 
 사이트 주소 끝에 `/admin/`을 붙여서 들어가요. (예: `https://www.dasulkim.com/admin/`) 사이트 어디에도 링크는 없어요.
 
-**할 수 있는 것**: 작품 추가·수정·삭제·순서 바꾸기·이미지 올리기, 사이트 정보(홈 소개, 이메일, 인스타그램, 포트폴리오 링크), Bio, 작가노트, CV(영어/한국어), 글(Texts), 포트폴리오 PDF(장 구성·글·캡션·이미지).
+**할 수 있는 것**: 작품 추가·수정·삭제·순서 바꾸기·이미지 올리기, 사이트 정보(홈 소개, 이메일, 인스타그램, 포트폴리오 링크), Bio, 작가노트, CV(영어/한국어), 글(Texts).
 
 **처음 한 번만 (토큰 만들기)**
 1. https://github.com/settings/personal-access-tokens/new 를 열어요.
@@ -68,4 +68,4 @@ Wix 요금제를 해지하기 전에 이 사이트가 정상으로 열리는지 
 - 폰트: Pretendard, Geist Mono (둘 다 SIL OFL 1.1, `assets/fonts/LICENSE.txt`).
 - 십자선 커서(마우스 전용)는 `assets/css/cursor.css`와 `assets/js/cursor.js`로 분리돼 있어요. 끄려면 `build.py`에서 이 두 파일을 불러오는 줄(`cursor.css`, `cursor.js`)을 지우고 `python3 build.py`를 다시 실행하세요. 터치 기기에서는 원래도 나타나지 않아요.
 - 레트로 스크롤바(데스크톱 3열 전용)는 `assets/css/scrollbar.css`와 `assets/js/scrollbar.js`로 분리돼 있어요. 끄려면 `build.py`에서 이 두 파일을 불러오는 줄을 지우고 `python3 build.py`를 다시 실행하세요. 모바일에서는 원래 스크롤바를 그대로 써요.
-- **포트폴리오 PDF**(`assets/portfolio/Dasul-Kim-Portfolio.pdf`)는 관리 페이지의 **"포트폴리오 PDF"** 메뉴에서 고쳐요. 한 줄이 PDF 한 장(펼침면=두 쪽)이고, 순서 바꾸기·추가·삭제, 글/캡션 고치기, 이미지 고르기·새로 올리기가 돼요. 편집 화면 위쪽의 미리보기는 PDF를 만드는 코드와 같은 코드로 그려서, 미리보기와 결과가 같아요. **게시하기**를 누르면 GitHub Actions(`.github/workflows/build-portfolio.yml`)가 PDF를 새로 만들어요(2~3분). 내용은 `content/portfolio.json`, 이미지는 `portfolio/img/`, 레이아웃 코드는 `portfolio/render.js`와 `portfolio/portfolio.css`에 있어요. 직접 만들어보려면 `node portfolio/render_pdf.js` (Node + Playwright + Chromium/Chrome 필요). 사이트의 "Portfolio PDF" 링크는 관리 페이지 "사이트 정보 → 포트폴리오 PDF 주소"(또는 `content/site.json`의 `portfolio`)에서 바꿀 수 있어요. 브랜치를 `main`으로 옮기면 `build-portfolio.yml`의 `branches`도 같이 바꿔요.
+- **포트폴리오 PDF**는 사이트에 파일을 두지 않고 링크만 연결해요. 관리 페이지의 "사이트 정보 → 포트폴리오 PDF 주소"(또는 `content/site.json`의 `portfolio`)에 PDF의 전체 주소를 넣으면 홈 오른쪽과 이력 페이지의 "Portfolio PDF" 링크가 새 창에서 그 주소를 열어요. 주소를 비우면 링크가 사라져요.

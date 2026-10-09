@@ -78,10 +78,10 @@
   var cfg = null, token = null;
   var S = {
     phase: 'boot', view: 'works', sel: null, cvLang: 'en', busy: false,
-    content: null, origSer: null, deletedWorks: [], build: null, pfSel: null, pfPending: {}
+    content: null, origSer: null, deletedWorks: [], build: null
   };
-  var KEYS = ['works', 'site', 'bio', 'statement', 'cv', 'texts', 'portfolio'];
-  var VIEWS = [['works', '작품'], ['site', '사이트 정보'], ['bio', '소개 Bio'], ['statement', '작가노트'], ['cv', '이력 CV'], ['texts', '글 Texts'], ['portfolio', '포트폴리오 PDF']];
+  var KEYS = ['works', 'site', 'bio', 'statement', 'cv', 'texts'];
+  var VIEWS = [['works', '작품'], ['site', '사이트 정보'], ['bio', '소개 Bio'], ['statement', '작가노트'], ['cv', '이력 CV'], ['texts', '글 Texts']];
 
   function ser(o) { return JSON.stringify(o, function (k, v) { return k.charAt(0) === '_' ? undefined : v; }, 1); }
 
@@ -127,7 +127,7 @@
       w.videos = w.videos || [];
     });
     KEYS.forEach(function (k) { orig[k] = ser(out[k]); });
-    S.content = out; S.origSer = orig; S.deletedWorks = []; S.sel = null; S.pfSel = null;
+    S.content = out; S.origSer = orig; S.deletedWorks = []; S.sel = null;
   }
 
   // ---------------------------------------------------------------- change tracking
@@ -135,7 +135,6 @@
   function pendingImages() {
     var n = 0;
     S.content.works.forEach(function (w) { w.images.forEach(function (im) { if (im._blob) n++; }); });
-    Object.keys(S.pfPending).forEach(function (k) { if (!S.pfPending[k].saved) n++; });
     return n;
   }
   function pendingDeletes() {
@@ -315,7 +314,7 @@
       h('div', { class: 'row2' },
         field('이메일', textInput(s, 'email', { type: 'email' })),
         field('인스타그램 주소', textInput(s, 'instagram', { type: 'url' }))),
-      field('포트폴리오 PDF 주소', textInput(s, 'portfolio'), 'CV 페이지와 홈 오른쪽에 링크로 나와요. 사이트 안의 파일(assets/portfolio/…pdf)이나 전체 주소(https://…) 모두 쓸 수 있어요.'));
+      field('포트폴리오 PDF 주소', textInput(s, 'portfolio', { type: 'url' }), '홈 오른쪽과 이력 페이지의 "Portfolio PDF" 링크가 열 주소예요. 구글 드라이브 등에 올린 PDF의 전체 주소(https://…)를 붙여넣으세요. 눌렀을 때 새 창에서 열려요. 비워두면 링크가 사라져요.'));
   }
 
   function viewParas(key, title, lead) {
@@ -378,7 +377,6 @@
     else if (v === 'bio') node = viewParas('bio', '소개 Bio', '소개 글이에요.');
     else if (v === 'statement') node = viewParas('statement', '작가노트', '작가노트 글이에요.');
     else if (v === 'cv') node = viewCv();
-    else if (v === 'portfolio') node = window.AdminPortfolio.view(api());
     else node = viewTexts();
     p.replaceChildren(node);
     refreshNav();
@@ -393,7 +391,7 @@
     });
   }
   function summary() {
-    var names = { works: '작품', site: '사이트 정보', bio: '소개', statement: '작가노트', cv: 'CV', texts: '글', portfolio: '포트폴리오 PDF' };
+    var names = { works: '작품', site: '사이트 정보', bio: '소개', statement: '작가노트', cv: 'CV', texts: '글' };
     var parts = changedKeys().map(function (k) { return names[k]; });
     if (pendingImages()) parts.push('새 이미지 ' + pendingImages() + '장');
     if (pendingDeletes()) parts.push('삭제 ' + pendingDeletes() + '건');
@@ -500,11 +498,6 @@
           entries.push({ path: dir + '/cover.jpg', blob: cv.blob });
         }
       }
-      Object.keys(S.pfPending).forEach(function (name) {
-        var pe = S.pfPending[name];
-        if (!pe.saved && pe.blob) entries.push({ path: 'portfolio/img/' + name, blob: pe.blob });
-      });
-      var pfChanged = changedKeys().indexOf('portfolio') >= 0 || Object.keys(S.pfPending).some(function (k) { return !S.pfPending[k].saved; });
       S.deletedWorks.forEach(function (dw) {
         var dir = 'assets/works/' + dw.slug;
         dw.images.concat((dw._deleted || []).map(function (f) { return { f: f }; })).forEach(function (im) { entries.push({ path: dir + '/' + im.f, del: true }); });
@@ -522,9 +515,8 @@
       KEYS.forEach(function (k) { S.origSer[k] = ser(S.content[k]); });
       ws.forEach(function (w) { delete w._new; w._deleted = []; w._coverFrom = w.images.length ? w.images[0].f : null; w.images.forEach(function (im) { if (im._blob) { im._cached = im._blob; delete im._blob; } }); });
       S.deletedWorks = [];
-      Object.keys(S.pfPending).forEach(function (k) { S.pfPending[k].saved = true; });
       S.busy = false; renderPanel(); refreshBar();
-      watchBuild(sha, pfChanged);
+      watchBuild(sha);
     } catch (e) {
       S.busy = false; refreshBar();
       setBuild(explain(e), 'bad');
@@ -566,9 +558,9 @@
     }
   }
 
-  async function watchBuild(sha, pdf) {
+  async function watchBuild(sha) {
     var actions = 'https://github.com/' + cfg.owner + '/' + cfg.repo + '/actions';
-    setBuild(pdf ? '저장했어요. 사이트와 포트폴리오 PDF를 다시 만들고 있어요… (보통 2~3분)' : '저장했어요. 사이트를 다시 만들고 있어요… (보통 1~2분)');
+    setBuild('저장했어요. 사이트를 다시 만들고 있어요… (보통 1~2분)');
     var t0 = Date.now();
     while (Date.now() - t0 < 240000) {
       await sleep(5000);
@@ -576,7 +568,7 @@
       try {
         var list = await gh(repoPath() + '/commits?sha=' + encodeURIComponent(cfg.branch) + '&per_page=8');
         var idx = list.findIndex(function (c) { return c.sha === sha; });
-        var built = list.slice(0, idx < 0 ? list.length : idx).some(function (c) { return (pdf ? /^Rebuild portfolio/ : /^Rebuild site/).test(c.commit.message); });
+        var built = list.slice(0, idx < 0 ? list.length : idx).some(function (c) { return /^Rebuild site/.test(c.commit.message); });
         if (built) { setBuild('완성됐어요! 사이트에는 1~2분 안에 반영돼요. 안 바뀌어 보이면 새로고침(또는 시크릿 창)으로 확인해보세요.', 'ok'); return; }
       } catch (e) { /* keep waiting */ }
     }
@@ -660,11 +652,6 @@
       errEl.textContent = explain(e);
       return false;
     }
-  }
-
-  function api() {
-    return { h: h, S: S, touch: touch, renderPanel: renderPanel, toast: toast, field: field, textInput: textInput,
-      areaInput: areaInput, moveItem: moveItem, resizeToJpeg: resizeToJpeg, autosize: autosize };
   }
 
   // ---------------------------------------------------------------- start

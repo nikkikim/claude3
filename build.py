@@ -34,6 +34,15 @@ INSTAGRAM = SITE_INFO["instagram"]
 PORTFOLIO = SITE_INFO["portfolio"]
 
 
+def portfolio_link(rel, br=True):
+    """the "Portfolio PDF" link (opens in a new window); nothing at all while the address is empty"""
+    if not PORTFOLIO.strip():
+        return ""
+    a = (f'<a class="u" href="{html.escape(portfolio_href(rel), quote=True)}" target="_blank" rel="noopener">'
+         f'{L("Portfolio PDF ↗", "포트폴리오 PDF ↗")}</a>')
+    return ("<br>" + a) if br else a
+
+
 def portfolio_href(rel):
     """a path like assets/portfolio/x.pdf is relative to the site root; a full https:// link is used as it is"""
     return PORTFOLIO if re.match(r"^(https?:)?//|^mailto:", PORTFOLIO) else rel + PORTFOLIO.lstrip("/")
@@ -222,11 +231,10 @@ def build_home():
     intro = f"""<div class="intro">
   <div data-l="en" lang="en"><p>{esc(DESC_EN)}</p></div>
   <div data-l="ko" lang="ko"><p>{esc(DESC_KO)}</p></div>
-  <p class="m"><a class="u" href="bio/">{L('Full bio', '소개 전체 보기')}</a></p>
+  <p class="m"><a class="u" href="bio/">{L('Full bio', '소개 전체')}</a></p>
 </div>"""
     cv_inner = (bilingual_cv(home_only=True) +
-                f'<div class="cv-more m"><a class="u" href="cv/">{L("Full CV →", "이력 전체 보기 →")}</a><br>'
-                f'<a class="u" href="{portfolio_href("")}" target="_blank" rel="noopener">{L("Portfolio PDF ↗", "포트폴리오 PDF ↗")}</a></div>')
+                f'<div class="cv-more m"><a class="u" href="cv/">{L("Full CV →", "이력 전체 →")}</a>{portfolio_link("")}</div>')
     right = right_col(cv_inner, "CV", "이력", extra=f'<a class="u" href="cv/">{L("Full", "전체")}</a>')
     write("index.html", page(
         rel="", path="", title_en="Dasul Kim — Media artist", title_ko="김다슬 — 미디어 아티스트",
@@ -312,7 +320,7 @@ def build_statement():
 
 def build_cv():
     rel = "../"
-    mid = (f'<div class="lab"><span class="m">CV</span><span class="m mute"><a class="u" href="{portfolio_href(rel)}" target="_blank" rel="noopener">{L("Portfolio PDF ↗", "포트폴리오 PDF ↗")}</a></span></div>'
+    mid = (f'<div class="lab"><span class="m">CV</span><span class="m mute">{portfolio_link(rel, False)}</span></div>'
            + bilingual_cv())
     write("cv/index.html", page(rel=rel, path="cv/", title_en="CV — Dasul Kim", title_ko="이력 — 김다슬",
                                 desc=DESC_EN, mid=mid, right=side_index(rel, None), current="cv"))
