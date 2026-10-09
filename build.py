@@ -163,6 +163,7 @@ def page(*, rel, path, title_en, title_ko, desc, left_extra="", mid, right, curr
 <link rel="apple-touch-icon" href="{rel}assets/apple-touch-icon.png">
 <link rel="preload" href="{rel}assets/fonts/Pretendard-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{rel}assets/css/style.css">
+<link rel="stylesheet" href="{rel}assets/css/cursor.css">
 </head>
 <body data-title-en="{esc(title_en)}" data-title-ko="{esc(title_ko)}">
 <a class="skip" href="#main">Skip to content</a>
@@ -183,6 +184,7 @@ def page(*, rel, path, title_en, title_ko, desc, left_extra="", mid, right, curr
 </div>
 <button class="to-top" type="button" aria-label="Back to top / 맨 위로"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" aria-hidden="true"><path d="M12 20V5M5.5 11.5 12 5l6.5 6.5"/></svg></button>
 <script src="{rel}assets/js/site.js" defer></script>
+<script src="{rel}assets/js/cursor.js" defer></script>
 </body>
 </html>
 """

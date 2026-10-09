@@ -51,3 +51,4 @@ Wix 요금제를 해지하기 전에 이 사이트가 정상으로 열리는지 
 
 - 영상은 Wix에 직접 올려둔 2개 작품(허공에서 수영하기, Temple of Flatness)만 파일로 포함돼 있어요. 나머지 작품은 정지 이미지예요.
 - 폰트: Pretendard, Geist Mono (둘 다 SIL OFL 1.1, `assets/fonts/LICENSE.txt`).
+- 십자선 커서(마우스 전용)는 `assets/css/cursor.css`와 `assets/js/cursor.js`로 분리돼 있어요. 끄려면 `build.py`에서 이 두 파일을 불러오는 줄(`cursor.css`, `cursor.js`)을 지우고 `python3 build.py`를 다시 실행하세요. 터치 기기에서는 원래도 나타나지 않아요.

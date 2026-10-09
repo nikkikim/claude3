@@ -1,0 +1,17 @@
+/* Catalog crosshair cursor (mouse only). Remove this file and cursor.js to turn it off. */
+.xh,.xh-xy{display:none}
+@media (hover:hover) and (pointer:fine){
+  .xh,.xh-xy{display:block;position:fixed;left:0;top:0;pointer-events:none;opacity:0;transition:opacity .15s;will-change:transform}
+  .xh{z-index:2147483000;mix-blend-mode:difference;color:#fff}
+  .xh-xy{z-index:2147483001}
+  .xh.show,.xh-xy.show{opacity:1}
+  html.xh-on,html.xh-on *{cursor:none!important}
+  html.xh-on video,html.xh-on video *{cursor:auto!important}
+  .xh svg{position:absolute;left:-14px;top:-14px;width:28px;height:28px;overflow:visible;transition:transform .18s ease}
+  .xh .dot{opacity:0;transition:opacity .15s}
+  .xh.is-link svg{transform:rotate(45deg)}
+  .xh.is-link .dot{opacity:1}
+  .xh-xy span{position:absolute;left:16px;top:14px;padding:2px 5px 1px;background:rgba(255,255,255,.92);color:#111;border-radius:2px;font:400 10px/1.25 var(--mono);letter-spacing:.02em;white-space:pre;text-transform:uppercase;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+  .xh-xy.flip-x span{left:auto;right:16px;text-align:right}
+  .xh-xy.flip-y span{top:auto;bottom:14px}
+}
