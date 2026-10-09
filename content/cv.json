@@ -8,7 +8,8 @@
     "2019 M.F.A., Sculpture. Ewha Womans University [Seodaemun-gu, Seoul, Republic of Korea]. 30 Aug. 2019.",
     "2015 B.F.A., Sculpture. Ewha Womans University [Seodaemun-gu, Seoul, Republic of Korea]. 23 Feb. 2015.",
     "B.A., Art History. Ewha Womans University [Seodaemun-gu, Seoul, Republic of Korea]. 23 Feb. 2015."
-   ]
+   ],
+   "home": true
   },
   {
    "heading": "SOLO EXHIBITIONS",
@@ -24,7 +25,8 @@
     "2020 “Future and Prophecy.” UCLA Experimental Digital Arts [Los Angeles, CA, United States]. 10-13 Feb. 2020.",
     "2019 “Is Today the Past or the Future?.” Cyartspace [Jongno-gu, Seoul, Republic of Korea]. 19-24 Mar. 2019.",
     "2018 “Delicate Situation.” Cultural Space ON [Jongno-gu, Seoul, Republic of Korea]. 26-31 Mar. 2018."
-   ]
+   ],
+   "home": false
   },
   {
    "heading": "GROUP EXHIBITIONS/SCREENINGS",
@@ -138,7 +140,8 @@
     "\"Just before Throwing Away Encore.\" Insa-dong Area [Jongno-gu, Seoul, Republid of Korea]. 1–14 Oct. 2012.",
     "\"Just before Throwing Away.\" Insa-dong Area [Jongno-gu, Seoul, Republid of Korea]. 7–23 Sep. 2012.",
     "\"May Day.\" Ewha Art Space [Seodaemun-gu, Seoul, Republic of Korea]. 21–26 May. 2012."
-   ]
+   ],
+   "home": false
   },
   {
    "heading": "AWARDS",
@@ -153,7 +156,8 @@
     "2015 Alessandro Mendini CI Award. Artcenter IDA [Republic of Korea]. 5 Jun. 2015.",
     "2013 The 150th Anniversary of Perrier ‘Water Meet an Artist’ Award. CUC Inc. [Republic of Korea]. 4 Jul. 2013.",
     "2012 The 5th Korea Erotic Art Award. KOART [Republic of Korea]. 16 Aug. 2012."
-   ]
+   ],
+   "home": false
   },
   {
    "heading": "AFFILIATIONS",
@@ -171,7 +175,8 @@
     "2013 Trainee Teacher. Jinmyeong Girl’s High School",
     "2012 Volunteer Instructor. Seoul Metropolitan Office of Education's Art Gifted Education Program",
     "2011 Volunteer Mentor. The JoongAng Ilbo Mentoring Program"
-   ]
+   ],
+   "home": true
   },
   {
    "heading": "PROFESSIONAL ACTIVITIES",
@@ -196,13 +201,15 @@
     "2021 Lecturer, Design | Media Art Undergraduate (Summer session), University of California, Los Angeles",
     "2015 Instructor, Youth Creative Art Education, Goyang Cultural Foundation Tanhyun Youth Center",
     "Art Teacher, Dongyang High School"
-   ]
+   ],
+   "home": false
   },
   {
    "heading": "CERTIFICATIONS",
    "items": [
     "2015.2.23. Korean Secondary School Art Teacher Certification"
-   ]
+   ],
+   "home": false
   }
  ],
  "ko": [
@@ -213,7 +220,8 @@
     "2021 캘리포니아대학교 로스앤젤레스. 미디어아트 석사",
     "2019 이화여자대학교. 조소 석사",
     "2015 이화여자대학교. 조소, 미술사 학사"
-   ]
+   ],
+   "home": true
   },
   {
    "heading": "개인전",
@@ -228,7 +236,8 @@
     "2023 \"납작한 입체들의 사원\", 오시선",
     "2020 \"Future and Prophecy\", UCLA EDA",
     "2019 \"오늘은 어제인가 내일인가\", Cyartspace 외 1"
-   ]
+   ],
+   "home": false
   },
   {
    "heading": "단체전/스크리닝",
@@ -284,7 +293,8 @@
     "\"May Fly IV\", 장수마을박물관",
     "2013 \"네가 감히\", 서울시청 시민청 갤러리 외 4",
     "2012 \"색을 밝히다\", 스페이스나인 외 1"
-   ]
+   ],
+   "home": false
   },
   {
    "heading": "수상",
@@ -295,7 +305,8 @@
     "2020 AI X Art Global Competition 은상 수상. AI.A Gallery",
     "2019 양자의 세계 3등상 수상. IBS Center for Quantum Nanoscience",
     "2013 페리에 130주년 기념 '물 만난 아티스트' 선정. CUC Inc."
-   ]
+   ],
+   "home": false
   },
   {
    "heading": "경력",
@@ -309,7 +320,8 @@
     "2017.09-2018.08 | 이화여자대학교 통역번역대학원 / 연구원",
     "2015.01-2015.12 | 고양문화재단 / 강사",
     "2015.05-2015.07 | 동양고등학교 / 교사"
-   ]
+   ],
+   "home": true
   },
   {
    "heading": "심사 및 특강",
@@ -330,14 +342,15 @@
     "국가보훈처 공모사업 메타로 독립 보고서 제작 강사",
     "한국글로벌학교(KGS) 미래와 소프트웨어 꿈찾기 캠프 강사",
     "동국대학교 기업 연계 캡스톤디자인 멘토"
-   ]
+   ],
+   "home": false
   },
   {
    "heading": "자격증",
    "items": [
     "2015 교원자격증. 중등학교 미술 정교사. 교육부"
-   ]
+   ],
+   "home": false
   }
- ],
- "portfolio": "https://drive.google.com/file/d/1ILHy0GU5EqHSQfgmN3PcGJKVBLm9DWjw/view?usp=sharing"
+ ]
 }

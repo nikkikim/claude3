@@ -13,12 +13,7 @@ import shutil
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 SITE = "https://www.dasulkim.com"
-EMAIL = "info@dasulkim.com"
-INSTAGRAM = "https://www.instagram.com/dsuriii"
 NAME_EN, NAME_KO = "Dasul Kim", "김다슬"
-DESC_EN = ("Dasul Kim is a media artist who explores the human ecosystem as it's projected onto "
-           "non-human entities. Her work offers an expanded interpretation of concepts such as body, "
-           "identity, the tangible and intangible, technology, and existence.")
 
 esc = html.escape
 
@@ -33,6 +28,12 @@ BIO = load("bio.json")
 STATEMENT = load("statement.json")
 CV = load("cv.json")
 TEXTS = load("texts.json")
+SITE_INFO = load("site.json")
+EMAIL = SITE_INFO["email"]
+INSTAGRAM = SITE_INFO["instagram"]
+PORTFOLIO = SITE_INFO["portfolio"]
+DESC_EN = SITE_INFO["desc_en"]
+DESC_KO = SITE_INFO["desc_ko"]
 
 # ---------------------------------------------------------------- helpers
 
@@ -45,10 +46,12 @@ def L(en, ko=None, tag="span", cls=""):
 
 
 def wtitle(w, lang):
-    return w["title_en"] if lang == "en" else w["title_ko"]
+    return w["title_en"] if lang == "en" else (w.get("title_ko") or w["title_en"])
 
 
 def cover_dims(w):
+    if not w["images"]:
+        return 900, 600
     im = w["images"][0]
     s = min(900 / im["w"], 900 / im["h"], 1)
     return round(im["w"] * s), round(im["h"] * s)
@@ -100,14 +103,12 @@ def cv_rows(items):
     return "".join(out)
 
 
-def cv_sections(lang, only=None, group_limit=None):
+def cv_sections(lang, home_only=False):
     out = []
-    for i, sec in enumerate(CV[lang]):
-        if only is not None and i not in only:
+    for sec in CV[lang]:
+        if home_only and not sec.get("home"):
             continue
         items = sec["items"]
-        if group_limit and i == 2:
-            items = items[:group_limit]
         out.append(f'<section class="cv-sec"><h2 class="m mute">{esc(sec["heading"])}</h2>{cv_rows(items)}</section>')
     return "".join(out)
 
@@ -198,11 +199,6 @@ def right_col(inner, label_en, label_ko, extra="", cls=""):
 # ---------------------------------------------------------------- home
 
 
-def first_sentence(text):
-    m = re.match(r"^(.*?다\.)\s", text)
-    return m.group(1) if m else text
-
-
 def build_home():
     cards = []
     for w in WORKS:
@@ -218,12 +214,12 @@ def build_home():
            f'<span class="m mute">{WORKS[-1]["year"]}–{WORKS[0]["year"]}</span></div>' + "".join(cards))
     intro = f"""<div class="intro">
   <div data-l="en" lang="en"><p>{esc(DESC_EN)}</p></div>
-  <div data-l="ko" lang="ko"><p>{esc(first_sentence(BIO['ko'][0]))}</p></div>
+  <div data-l="ko" lang="ko"><p>{esc(DESC_KO)}</p></div>
   <p class="m"><a class="u" href="bio/">{L('Full bio', '소개 전체 보기')}</a></p>
 </div>"""
-    cv_inner = (bilingual_cv(only={0, 4}) +
+    cv_inner = (bilingual_cv(home_only=True) +
                 f'<div class="cv-more m"><a class="u" href="cv/">{L("Full CV →", "이력 전체 보기 →")}</a><br>'
-                f'<a class="u" href="{CV["portfolio"]}" target="_blank" rel="noopener">{L("Portfolio PDF ↗", "포트폴리오 PDF ↗")}</a></div>')
+                f'<a class="u" href="{PORTFOLIO}" target="_blank" rel="noopener">{L("Portfolio PDF ↗", "포트폴리오 PDF ↗")}</a></div>')
     right = right_col(cv_inner, "CV", "이력", extra=f'<a class="u" href="cv/">{L("Full", "전체")}</a>')
     write("index.html", page(
         rel="", path="", title_en="Dasul Kim — Media artist", title_ko="김다슬 — 미디어 아티스트",
@@ -241,7 +237,7 @@ def build_works():
         figs = []
         n_img = len(w["images"])
         for k, im in enumerate(w["images"], 1):
-            figs.append(f"""<figure class="fig"><img src="{rel}assets/works/{w['slug']}/{k:02d}.jpg" width="{im['w']}" height="{im['h']}" alt="{esc(w['title_en'])} ({k}/{n_img})" loading="{'eager' if k == 1 else 'lazy'}" decoding="async"></figure>""")
+            figs.append(f"""<figure class="fig"><img src="{rel}assets/works/{w['slug']}/{im['f']}" width="{im['w']}" height="{im['h']}" alt="{esc(w['title_en'])} ({k}/{n_img})" loading="{'eager' if k == 1 else 'lazy'}" decoding="async"></figure>""")
         for v in w["videos"]:
             figs.append(f"""<figure class="fig"><video controls preload="none" playsinline src="{rel}assets/works/{w['slug']}/{v}.mp4"></video></figure>""")
         prev_w = WORKS[i - 1] if i > 0 else None
@@ -309,23 +305,20 @@ def build_statement():
 
 def build_cv():
     rel = "../"
-    mid = (f'<div class="lab"><span class="m">CV</span><span class="m mute"><a class="u" href="{CV["portfolio"]}" target="_blank" rel="noopener">{L("Portfolio PDF ↗", "포트폴리오 PDF ↗")}</a></span></div>'
+    mid = (f'<div class="lab"><span class="m">CV</span><span class="m mute"><a class="u" href="{PORTFOLIO}" target="_blank" rel="noopener">{L("Portfolio PDF ↗", "포트폴리오 PDF ↗")}</a></span></div>'
            + bilingual_cv())
     write("cv/index.html", page(rel=rel, path="cv/", title_en="CV — Dasul Kim", title_ko="이력 — 김다슬",
                                 desc=DESC_EN, mid=mid, right=side_index(rel, None), current="cv"))
 
 
-ESSAY_EN = {
-    "layers": "Foreword to the solo exhibition “LAYERS”",
-    "deep-dof": "Foreword to the solo exhibition “Deep DOF”",
-    "blam-bang-boom": "Review of the solo exhibition “BLAM BANG BOOM”",
-}
+def essay_en(e):
+    return e.get("title_en") or e["title"]
 
 
 def build_texts():
     rel = "../"
     toc = "".join(
-        f'<a href="#{e["slug"]}">{L(esc(ESSAY_EN[e["slug"]]), esc(e["title"]))}</a>' for e in TEXTS)
+        f'<a href="#{e["slug"]}">{L(esc(essay_en(e)), esc(e["title"]))}</a>' for e in TEXTS)
     blocks = []
     for e in TEXTS:
         sub = f'<p class="by" lang="ko">{esc(e["subtitle"])}</p>' if e.get("subtitle") else ""
@@ -333,7 +326,7 @@ def build_texts():
         body = "".join(f'<p lang="ko">{esc(p)}</p>' for p in e["paras"])
         blocks.append(f"""<article class="essay prose" id="{e['slug']}">
 <p class="m mute">{L('Essay · written in Korean', '글')}</p>
-<h2>{L(esc(ESSAY_EN[e['slug']]), esc(e['title']))}</h2>
+<h2>{L(esc(essay_en(e)), esc(e['title']))}</h2>
 {sub}<p class="m by" lang="ko">{esc(e['author'])}</p>
 {body}
 <div class="notes">{notes}</div>
