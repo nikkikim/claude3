@@ -157,7 +157,10 @@ def page(*, rel, path, title_en, title_ko, desc, left_extra="", mid, right, curr
 {og}
 <meta name="twitter:card" content="summary_large_image">
 <meta name="color-scheme" content="light">
-<link rel="icon" href="{rel}assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="{rel}assets/favicon.ico" sizes="48x48">
+<link rel="icon" href="{rel}assets/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="{rel}assets/favicon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="{rel}assets/apple-touch-icon.png">
 <link rel="preload" href="{rel}assets/fonts/Pretendard-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{rel}assets/css/style.css">
 </head>
@@ -364,9 +367,7 @@ def build_meta():
     write("sitemap.xml", f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{items}</urlset>\n')
     write("robots.txt", f"User-agent: *\nAllow: /\nSitemap: {SITE}/sitemap.xml\n")
     write(".nojekyll", "")
-    write("assets/favicon.svg",
-          '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" fill="#d9e8fb"/>'
-          '<text x="16" y="21" font-family="monospace" font-size="14" text-anchor="middle" fill="#111">DK</text></svg>\n')
+    shutil.copyfile(os.path.join(ROOT, "assets", "favicon.ico"), os.path.join(ROOT, "favicon.ico"))  # browsers ask for /favicon.ico
 
 
 if __name__ == "__main__":
