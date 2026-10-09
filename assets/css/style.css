@@ -121,4 +121,10 @@ html[lang="en"] .lang [data-set-lang="en"],html[lang="ko"] .lang [data-set-lang=
   .cv-row{grid-template-columns:78px 1fr}
   .col.right.idx-only{display:none}
 }
+.to-top{display:none}
+@media (max-width:959px){
+  .to-top{display:flex;align-items:center;justify-content:center;position:fixed;right:16px;bottom:16px;width:44px;height:44px;border-radius:50%;background:var(--bg);border:1px solid var(--fg);z-index:20;opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s}
+  .to-top.show{opacity:1;visibility:visible}
+  .to-top:active{background:var(--hl)}
+}
 @media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}

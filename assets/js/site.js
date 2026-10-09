@@ -43,4 +43,15 @@
     if (e.key === 'ArrowRight' && next) location.href = next.href;
   });
 
+  // back-to-top button (shown on mobile after scrolling)
+  var toTop = document.querySelector('.to-top');
+  if (toTop) {
+    var onScroll = function () { toTop.classList.toggle('show', window.scrollY > 400); };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    toTop.addEventListener('click', function () {
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+    });
+  }
 })();

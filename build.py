@@ -178,6 +178,7 @@ def page(*, rel, path, title_en, title_ko, desc, left_extra="", mid, right, curr
 </main>
 {right}
 </div>
+<button class="to-top" type="button" aria-label="Back to top / 맨 위로"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" aria-hidden="true"><path d="M12 20V5M5.5 11.5 12 5l6.5 6.5"/></svg></button>
 <script src="{rel}assets/js/site.js" defer></script>
 </body>
 </html>
