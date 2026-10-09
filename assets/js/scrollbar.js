@@ -1,0 +1,112 @@
+/* Retro "Xerox Star" scrollbar for the three desktop columns.
+   top cap = jump to top, ↓ = scroll up a little, − = page up, ◆ = position (drag it),
+   + = page down, ↑ = scroll down a little, bottom cap = jump to bottom.
+   Wheel, touch and keyboard scrolling keep working as usual; this only replaces the bar. */
+(function () {
+  var cols = [].slice.call(document.querySelectorAll('.cols > .col'));
+  if (!cols.length || !window.matchMedia) return;
+
+  var root = document.documentElement;
+  var mq = window.matchMedia('(min-width: 960px)');
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var behavior = reduce ? 'auto' : 'smooth';
+  var TOP = 84, BOTTOM = 16, WIDTH = 19, INSET = 6, DIA = 11;
+
+  var ICON = {
+    down: '<svg viewBox="0 0 9 11"><path d="M4.5 1v8M1.5 6.5l3 3 3-3"/></svg>',
+    up: '<svg viewBox="0 0 9 11"><path d="M4.5 10V2M1.5 4.5l3-3 3 3"/></svg>',
+    minus: '<svg viewBox="0 0 9 11"><path d="M1.5 5.5h6"/></svg>',
+    plus: '<svg viewBox="0 0 9 11"><path d="M1.5 5.5h6M4.5 2.5v6"/></svg>'
+  };
+
+  function btn(cls, label, html) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = cls; b.tabIndex = -1; b.setAttribute('aria-label', label);
+    if (html) b.innerHTML = html;
+    return b;
+  }
+
+  // call fn now, then keep calling while the pointer is held down
+  function hold(el, fn, first, every) {
+    el.addEventListener('pointerdown', function (e) {
+      if (e.button) return;
+      e.preventDefault();
+      fn();
+      var iv = 0, t = setTimeout(function () { iv = setInterval(fn, every); }, first);
+      function stop() {
+        clearTimeout(t); clearInterval(iv);
+        window.removeEventListener('pointerup', stop); window.removeEventListener('pointercancel', stop);
+      }
+      window.addEventListener('pointerup', stop); window.addEventListener('pointercancel', stop);
+    });
+  }
+
+  function attach(col) {
+    var bar = document.createElement('div');
+    bar.className = 'sb'; bar.setAttribute('aria-hidden', 'true');
+    var capTop = btn('cap', 'top'), up = btn('box', 'scroll up', ICON.down), pgUp = btn('box', 'page up', ICON.minus);
+    var track = document.createElement('div'); track.className = 'track';
+    track.innerHTML = '<svg class="dia" viewBox="0 0 11 11"><path d="M5.5 0 11 5.5 5.5 11 0 5.5z"/></svg>';
+    var dia = track.firstChild;
+    var pgDn = btn('box', 'page down', ICON.plus), dn = btn('box', 'scroll down', ICON.up), capBot = btn('cap', 'bottom');
+    [capTop, up, pgUp, track, pgDn, dn, capBot].forEach(function (n) { bar.appendChild(n); });
+    document.body.appendChild(bar);
+
+    var queued = false;
+    function max() { return col.scrollHeight - col.clientHeight; }
+
+    function update() {
+      queued = false;
+      var m = max(), on = mq.matches && m > 4;
+      bar.classList.toggle('on', on);
+      if (!on) return;
+      var r = col.getBoundingClientRect();
+      bar.style.left = Math.round(r.right - WIDTH - INSET) + 'px';
+      bar.style.top = TOP + 'px';
+      bar.style.height = Math.max(120, window.innerHeight - TOP - BOTTOM) + 'px';
+      var th = track.clientHeight, ratio = Math.min(1, Math.max(0, col.scrollTop / m));
+      dia.style.transform = 'translateY(' + Math.round(ratio * Math.max(0, th - DIA)) + 'px)';
+    }
+    function schedule() { if (!queued) { queued = true; requestAnimationFrame(update); } }
+    attach.schedulers.push(schedule);
+
+    col.addEventListener('scroll', schedule, { passive: true });
+    hold(up, function () { col.scrollBy(0, -64); }, 350, 40);
+    hold(dn, function () { col.scrollBy(0, 64); }, 350, 40);
+    hold(pgUp, function () { col.scrollBy({ top: -col.clientHeight * 0.9, behavior: behavior }); }, 500, 380);
+    hold(pgDn, function () { col.scrollBy({ top: col.clientHeight * 0.9, behavior: behavior }); }, 500, 380);
+    capTop.addEventListener('click', function () { col.scrollTo({ top: 0, behavior: behavior }); });
+    capBot.addEventListener('click', function () { col.scrollTo({ top: max(), behavior: behavior }); });
+
+    // click or drag anywhere on the track: the diamond follows the pointer
+    var dragging = false;
+    function seek(e) {
+      var r = track.getBoundingClientRect(), span = Math.max(1, r.height - DIA);
+      var ratio = Math.min(1, Math.max(0, (e.clientY - r.top - DIA / 2) / span));
+      col.scrollTop = ratio * max();
+    }
+    track.addEventListener('pointerdown', function (e) {
+      if (e.button) return;
+      e.preventDefault(); dragging = true; track.setPointerCapture(e.pointerId); seek(e);
+    });
+    track.addEventListener('pointermove', function (e) { if (dragging) seek(e); });
+    function endDrag() { dragging = false; }
+    track.addEventListener('pointerup', endDrag); track.addEventListener('pointercancel', endDrag);
+
+    if (window.ResizeObserver) {
+      var ro = new ResizeObserver(schedule);
+      ro.observe(col);
+      [].slice.call(col.children).forEach(function (c) { ro.observe(c); });
+    }
+    schedule();
+  }
+  attach.schedulers = [];
+
+  cols.forEach(attach);
+  root.classList.add('sb-on');
+  function all() { attach.schedulers.forEach(function (s) { s(); }); }
+  window.addEventListener('resize', all);
+  document.addEventListener('load', all, true);          // images finishing to load change the height
+  if (mq.addEventListener) mq.addEventListener('change', all);
+  window.addEventListener('load', all);
+})();

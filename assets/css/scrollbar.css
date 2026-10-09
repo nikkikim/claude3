@@ -1,0 +1,25 @@
+/* Retro "Xerox Star" scrollbar for the three desktop columns.
+   Remove this file and scrollbar.js to go back to the browser's scrollbar. */
+.sb{display:none}
+
+@media (min-width:960px){
+  /* native scrollbars are hidden only after scrollbar.js has started (html.sb-on) */
+  html.sb-on .col{scrollbar-width:none;padding-right:36px}
+  html.sb-on .col::-webkit-scrollbar{display:none;width:0;height:0}
+  html.sb-on .lab{margin-right:-36px;padding-right:36px}
+
+  .sb.on{display:flex}
+  .sb{position:fixed;z-index:30;width:19px;flex-direction:column;background:#fff;border:1px solid #111;
+      -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+  .sb>*{flex:none;display:flex;align-items:center;justify-content:center;width:100%;padding:0;border:0;border-bottom:1px solid #111;
+        background:#fff;color:#111;cursor:default;font:inherit}
+  .sb>:last-child{border-bottom:0}
+  .sb .cap{height:14px;background:#8d8d8d}
+  .sb .box{height:18px}
+  .sb .box svg{width:9px;height:11px;fill:none;stroke:currentColor;stroke-width:1;shape-rendering:crispEdges;pointer-events:none}
+  .sb .box:hover{background:var(--hl)}
+  .sb .cap:hover{background:#6f6f6f}
+  .sb .box:active,.sb .cap:active{background:#111;color:#fff}
+  .sb .track{flex:1 1 auto;position:relative;display:block;min-height:36px;touch-action:none}
+  .sb .dia{position:absolute;left:3px;top:0;width:11px;height:11px;pointer-events:none;fill:#111}
+}
