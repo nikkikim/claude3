@@ -37,5 +37,8 @@ jobs:
             exit 0
           fi
           git commit -m "Rebuild site"
-          git pull --rebase origin "${{ github.ref_name }}" || true
-          git push origin "HEAD:${{ github.ref_name }}"
+          for i in 1 2 3 4; do
+            git pull --rebase origin "${{ github.ref_name }}" && git push origin "HEAD:${{ github.ref_name }}" && exit 0
+            sleep $((i * 3))
+          done
+          exit 1

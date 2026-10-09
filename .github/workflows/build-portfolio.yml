@@ -1,0 +1,52 @@
+# Rebuilds the portfolio PDF (assets/portfolio/Dasul-Kim-Portfolio.pdf) whenever the portfolio data
+# or its images change, e.g. after you press "게시하기" in /admin/ ("포트폴리오 PDF").
+name: Rebuild portfolio
+
+on:
+  push:
+    branches: [main, claude/adoring-bohr-8s0tqm]
+    paths:
+      - 'content/portfolio.json'
+      - 'portfolio/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rebuild-portfolio-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Playwright (library only; the runner already has Google Chrome)
+        run: npm install --no-save --prefix "$RUNNER_TEMP/pw" playwright-core
+
+      - name: Build the PDF
+        env:
+          NODE_PATH: ${{ runner.temp }}/pw/node_modules
+        run: node portfolio/render_pdf.js
+
+      - name: Commit the PDF
+        run: |
+          git config user.name "site-builder[bot]"
+          git config user.email "site-builder@users.noreply.github.com"
+          git add assets/portfolio/Dasul-Kim-Portfolio.pdf
+          if git diff --cached --quiet; then
+            echo "Nothing changed."
+            exit 0
+          fi
+          git commit -m "Rebuild portfolio"
+          for i in 1 2 3 4; do
+            git pull --rebase origin "${{ github.ref_name }}" && git push origin "HEAD:${{ github.ref_name }}" && exit 0
+            sleep $((i * 3))
+          done
+          exit 1

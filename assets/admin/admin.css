@@ -114,3 +114,18 @@ input:focus,textarea:focus,select:focus{border-color:#4b8bdc;outline:0}
   .wrow .ctl{grid-column:1/-1;justify-content:flex-end}
   .wrow img{width:52px}
 }
+
+/* portfolio editor */
+.pf-prev{position:sticky;top:64px;z-index:6;width:100%;background:#eee;border:1px solid var(--line);overflow:hidden;margin:6px 0 0;box-shadow:0 8px 14px -10px rgba(0,0,0,.35)}
+.pf-prev-in{position:absolute;left:0;top:0;width:1440px;height:810px;transform-origin:0 0}
+.card .m{color:var(--mute)}
+.pf-modal{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:40;display:flex;align-items:center;justify-content:center;padding:20px}
+.pf-box{background:#fff;width:min(980px,100%);max-height:90vh;overflow:auto;padding:16px 18px}
+.pf-pool{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
+.pf-thumb{position:relative;aspect-ratio:1/1;background:#f2f2f2;border:1px solid var(--line);padding:0;display:flex;align-items:center;justify-content:center}
+.pf-thumb img{max-width:100%;max-height:100%;display:block}
+.pf-thumb:hover{outline:2px solid var(--hl)}
+.pf-thumb.on{outline:2px solid #4b8bdc}
+.pf-thumb .ck{position:absolute;right:4px;top:4px;background:#4b8bdc;color:#fff;border-radius:20px;font:11px var(--mono);padding:0 6px}
+input[type=range]{width:100%;padding:0;border:0}
+select{background:#fff}
