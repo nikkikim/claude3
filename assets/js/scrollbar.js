@@ -10,13 +10,13 @@
   var mq = window.matchMedia('(min-width: 960px)');
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var behavior = reduce ? 'auto' : 'smooth';
-  var TOP = 84, BOTTOM = 16, WIDTH = 19, INSET = 6, DIA = 11;
+  var TOP = 84, BOTTOM = 16, WIDTH = 11, INSET = 5, DIA = 7;
 
   var ICON = {
-    down: '<svg viewBox="0 0 9 11"><path d="M4.5 1v8M1.5 6.5l3 3 3-3"/></svg>',
-    up: '<svg viewBox="0 0 9 11"><path d="M4.5 10V2M1.5 4.5l3-3 3 3"/></svg>',
-    minus: '<svg viewBox="0 0 9 11"><path d="M1.5 5.5h6"/></svg>',
-    plus: '<svg viewBox="0 0 9 11"><path d="M1.5 5.5h6M4.5 2.5v6"/></svg>'
+    down: '<svg viewBox="0 0 7 9"><path d="M3.5 1v6M1 5l2.5 2.5L6 5"/></svg>',
+    up: '<svg viewBox="0 0 7 9"><path d="M3.5 8V2M1 4l2.5-2.5L6 4"/></svg>',
+    minus: '<svg viewBox="0 0 7 9"><path d="M1 4.5h5"/></svg>',
+    plus: '<svg viewBox="0 0 7 9"><path d="M1 4.5h5M3.5 2v5"/></svg>'
   };
 
   function btn(cls, label, html) {
@@ -46,7 +46,7 @@
     bar.className = 'sb'; bar.setAttribute('aria-hidden', 'true');
     var capTop = btn('cap', 'top'), up = btn('box', 'scroll up', ICON.down), pgUp = btn('box', 'page up', ICON.minus);
     var track = document.createElement('div'); track.className = 'track';
-    track.innerHTML = '<svg class="dia" viewBox="0 0 11 11"><path d="M5.5 0 11 5.5 5.5 11 0 5.5z"/></svg>';
+    track.innerHTML = '<svg class="dia" viewBox="0 0 7 7"><path d="M3.5 0 7 3.5 3.5 7 0 3.5z"/></svg>';
     var dia = track.firstChild;
     var pgDn = btn('box', 'page down', ICON.plus), dn = btn('box', 'scroll down', ICON.up), capBot = btn('cap', 'bottom');
     [capTop, up, pgUp, track, pgDn, dn, capBot].forEach(function (n) { bar.appendChild(n); });
