@@ -1011,17 +1011,17 @@
   "medium": "single-channel video, color, sound, 1min",
   "images": [
    {
+    "f": "03.jpg",
+    "w": 1280,
+    "h": 768
+   },
+   {
     "f": "01.jpg",
     "w": 1280,
     "h": 768
    },
    {
     "f": "02.jpg",
-    "w": 1280,
-    "h": 768
-   },
-   {
-    "f": "03.jpg",
     "w": 1280,
     "h": 768
    },
