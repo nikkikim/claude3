@@ -54,7 +54,7 @@ html[lang="en"] .lang [data-set-lang="en"],html[lang="ko"] .lang [data-set-lang=
 /* works cards (home) */
 .work{padding:14px 0 18px;border-bottom:1px solid var(--line)}
 .work a.cover{display:block;text-decoration:none}
-.work img{width:100%;height:auto;aspect-ratio:3/2;object-fit:contain;background:#f4f4f4}
+.work img{width:100%;height:auto;aspect-ratio:3/2;object-fit:contain;background:#f4f4f4;padding:5%}
 .work .row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px}
 .work .t{font-family:var(--mono);font-size:11px;text-transform:uppercase}
 .work .t a{text-decoration:none}

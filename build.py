@@ -76,11 +76,25 @@ YEAR_RE = re.compile(
 )
 
 
+MONTH_RANGE_RE = re.compile(r"^((?:19|20)\d{2})\.\d{1,2}\s*-\s*(?:((?:19|20)\d{2})\.\d{1,2}|(현재))$")
+
+
+def year_only(date):
+    """'2021.10-2024.06' -> '2021-2024', '2024.03-2024.06' -> '2024', '2024.09-현재' -> '2024-현재'."""
+    m = MONTH_RANGE_RE.match(date)
+    if not m:
+        return date
+    start, end, current = m.groups()
+    if current:
+        return f"{start}-{current}"
+    return start if start == end else f"{start}-{end}"
+
+
 def cv_rows(items):
     out = []
     for line in items:
         m = YEAR_RE.match(line)
-        y, rest = (m.group(1), m.group(2)) if m else ("", line)
+        y, rest = (year_only(m.group(1)), m.group(2)) if m else ("", line)
         cls = "cv-row range" if len(y) > 12 else "cv-row"
         out.append(f'<div class="{cls}"><span class="y">{esc(y)}</span><span>{esc(rest)}</span></div>')
     return "".join(out)
@@ -201,7 +215,7 @@ def build_home():
   <div data-l="ko" lang="ko"><p>{esc(first_sentence(BIO['ko'][0]))}</p></div>
   <p class="m"><a class="u" href="bio/">{L('Full bio', '소개 전체 보기')}</a></p>
 </div>"""
-    cv_inner = (bilingual_cv(only={0, 1, 2}, group_limit=8) +
+    cv_inner = (bilingual_cv(only={0, 4}) +
                 f'<div class="cv-more m"><a class="u" href="cv/">{L("Full CV →", "이력 전체 보기 →")}</a><br>'
                 f'<a class="u" href="{CV["portfolio"]}" target="_blank" rel="noopener">{L("Portfolio PDF ↗", "포트폴리오 PDF ↗")}</a></div>')
     right = right_col(cv_inner, "CV", "이력", extra=f'<a class="u" href="cv/">{L("Full", "전체")}</a>')
