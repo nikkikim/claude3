@@ -43,15 +43,4 @@
     if (e.key === 'ArrowRight' && next) location.href = next.href;
   });
 
-  // contact form -> opens the visitor's mail app
-  var form = document.getElementById('contact-form');
-  if (form) {
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
-      var f = new FormData(form);
-      var subject = 'Message from ' + (f.get('name') || 'website');
-      var body = (f.get('message') || '') + '\n\n— ' + (f.get('name') || '') + ' <' + (f.get('email') || '') + '>';
-      location.href = 'mailto:' + form.dataset.to + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
-    });
-  }
 })();

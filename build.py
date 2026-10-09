@@ -65,9 +65,9 @@ MENU = [
     ("bio", "bio/", "Bio", "소개"),
     ("statement", "statement/", "Artist Statement", "작가 노트"),
     ("works", "#works", "Works", "작업"),
-    ("cv", "cv/", "CV", "이력"),
-    ("texts", "texts/", "Texts", "글"),
-    ("contact", "contact/", "Contact", "연락"),
+    ("cv", "cv/", "CV", "CV"),
+    ("texts", "texts/", "Texts", "텍스트"),
+    ("contact", "contact/", "Contact", "연락처"),
 ]
 
 YEAR_RE = re.compile(
@@ -81,7 +81,8 @@ def cv_rows(items):
     for line in items:
         m = YEAR_RE.match(line)
         y, rest = (m.group(1), m.group(2)) if m else ("", line)
-        out.append(f'<div class="cv-row"><span class="y">{esc(y)}</span><span>{esc(rest)}</span></div>')
+        cls = "cv-row range" if len(y) > 12 else "cv-row"
+        out.append(f'<div class="{cls}"><span class="y">{esc(y)}</span><span>{esc(rest)}</span></div>')
     return "".join(out)
 
 
@@ -121,7 +122,7 @@ def page(*, rel, path, title_en, title_ko, desc, left_extra="", mid, right, curr
     menu_html = (
         "".join(menu) + '<span class="gap"></span>'
         f'<a href="{INSTAGRAM}" rel="noopener" target="_blank">Instagram ↗</a>'
-        f'<a href="mailto:{EMAIL}">{esc(EMAIL)}</a>'
+        f'<a href="mailto:{EMAIL}">{esc(EMAIL)} ↗</a>'
     )
     og = f'<meta property="og:image" content="{SITE}/{og_image}">' if og_image else ""
     canon = canonical or (SITE + "/" + path)
@@ -151,7 +152,7 @@ def page(*, rel, path, title_en, title_ko, desc, left_extra="", mid, right, curr
 <div class="cols">
 <aside class="col left">
   <div class="lab">
-    <a class="name m" href="{rel or './'}">{NAME_EN} {NAME_KO}</a>
+    <a class="name m" href="{rel or './'}">{L(NAME_EN, NAME_KO)}</a>
     <div class="lang m" role="group" aria-label="Language"><button type="button" data-set-lang="en" aria-pressed="true">EN</button><span class="sep">/</span><button type="button" data-set-lang="ko" aria-pressed="false">KR</button></div>
   </div>
   <nav class="menu m" aria-label="Main">{menu_html}</nav>
@@ -201,9 +202,9 @@ def build_home():
   <p class="m"><a class="u" href="bio/">{L('Full bio', '소개 전체 보기')}</a></p>
 </div>"""
     cv_inner = (bilingual_cv(only={0, 1, 2}, group_limit=8) +
-                f'<div class="cv-more m"><a class="u" href="cv/">{L("Full CV →", "이력 전체 보기 →")}</a><br>'
+                f'<div class="cv-more m"><a class="u" href="cv/">{L("Full CV →", "CV 전체 보기 →")}</a><br>'
                 f'<a class="u" href="{CV["portfolio"]}" target="_blank" rel="noopener">{L("Portfolio PDF ↗", "포트폴리오 PDF ↗")}</a></div>')
-    right = right_col(cv_inner, "CV", "이력", extra=f'<a class="u" href="cv/">{L("Full", "전체")}</a>')
+    right = right_col(cv_inner, "CV", "CV", extra=f'<a class="u" href="cv/">{L("Full", "전체")}</a>')
     write("index.html", page(
         rel="", path="", title_en="Dasul Kim — Media artist", title_ko="김다슬 — 미디어 아티스트",
         desc=DESC_EN, left_extra=intro, mid=mid, right=right, og_image=f"assets/works/{WORKS[0]['slug']}/cover.jpg"))
@@ -220,9 +221,9 @@ def build_works():
         figs = []
         n_img = len(w["images"])
         for k, im in enumerate(w["images"], 1):
-            figs.append(f"""<figure class="fig"><img src="{rel}assets/works/{w['slug']}/{k:02d}.jpg" width="{im['w']}" height="{im['h']}" alt="{esc(w['title_en'])} ({k}/{n_img})" loading="{'eager' if k == 1 else 'lazy'}" decoding="async"><figcaption class="cap m mute"><span>{k:02d} / {n_img:02d}</span></figcaption></figure>""")
+            figs.append(f"""<figure class="fig"><img src="{rel}assets/works/{w['slug']}/{k:02d}.jpg" width="{im['w']}" height="{im['h']}" alt="{esc(w['title_en'])} ({k}/{n_img})" loading="{'eager' if k == 1 else 'lazy'}" decoding="async"></figure>""")
         for v in w["videos"]:
-            figs.append(f"""<figure class="fig"><video controls preload="none" playsinline src="{rel}assets/works/{w['slug']}/{v}.mp4"></video><figcaption class="cap m mute"><span>{L('Video', '영상')}</span></figcaption></figure>""")
+            figs.append(f"""<figure class="fig"><video controls preload="none" playsinline src="{rel}assets/works/{w['slug']}/{v}.mp4"></video></figure>""")
         prev_w = WORKS[i - 1] if i > 0 else None
         next_w = WORKS[i + 1] if i < total - 1 else None
         pager = ""
@@ -239,8 +240,8 @@ def build_works():
 {medium}
 <div class="pager m">{pager}</div>
 </div>"""
-        mid = (f'<div class="lab"><span class="m">{L(esc(w["title_en"]), esc(w["title_ko"]))}</span>'
-               f'<span class="m mute">{n_img} {L("images", "이미지")}</span></div>' + "".join(figs))
+        mid = (f'<div class="lab"><span class="m">{L(esc(w["title_en"]), esc(w["title_ko"]))}</span></div>'
+               + "".join(figs))
         right = right_col(index_list(rel, w["slug"]), "Index", "목록", extra=str(total), cls="idx-only")
         t_en = f'{w["title_en"]} ({w["year"]}) — {NAME_EN}'
         t_ko = f'{w["title_ko"]} ({w["year"]}) — {NAME_KO}'
@@ -268,7 +269,7 @@ def side_index(rel, current):
 
 def build_bio():
     rel = "../"
-    mid = (f'<div class="lab"><span class="m">{L("Bio", "소개")}</span><span class="m mute">{NAME_EN} {NAME_KO}</span></div>'
+    mid = (f'<div class="lab"><span class="m">{L("Bio", "소개")}</span><span class="m mute">{L(NAME_EN, NAME_KO)}</span></div>'
            f'<div class="prose"><div data-l="en" lang="en">{paras(BIO["en"], "en")}</div>'
            f'<div data-l="ko" lang="ko">{paras(BIO["ko"], "ko")}</div>'
            f'<p class="m"><a class="u" href="{rel}cv/">CV →</a> &nbsp; <a class="u" href="mailto:{EMAIL}">{EMAIL}</a></p></div>')
@@ -278,7 +279,7 @@ def build_bio():
 
 def build_statement():
     rel = "../"
-    mid = (f'<div class="lab"><span class="m">{L("Artist Statement", "작가 노트")}</span><span class="m mute">{NAME_EN} {NAME_KO}</span></div>'
+    mid = (f'<div class="lab"><span class="m">{L("Artist Statement", "작가 노트")}</span><span class="m mute">{L(NAME_EN, NAME_KO)}</span></div>'
            f'<div class="prose"><div data-l="en" lang="en">{paras(STATEMENT["en"], "en")}</div>'
            f'<div data-l="ko" lang="ko">{paras(STATEMENT["ko"], "ko")}</div></div>')
     write("statement/index.html", page(rel=rel, path="statement/", title_en="Artist Statement — Dasul Kim",
@@ -290,7 +291,7 @@ def build_cv():
     rel = "../"
     mid = (f'<div class="lab"><span class="m">CV</span><span class="m mute"><a class="u" href="{CV["portfolio"]}" target="_blank" rel="noopener">{L("Portfolio PDF ↗", "포트폴리오 PDF ↗")}</a></span></div>'
            + bilingual_cv())
-    write("cv/index.html", page(rel=rel, path="cv/", title_en="CV — Dasul Kim", title_ko="이력 — 김다슬",
+    write("cv/index.html", page(rel=rel, path="cv/", title_en="CV — Dasul Kim", title_ko="CV — 김다슬",
                                 desc=DESC_EN, mid=mid, right=side_index(rel, None), current="cv"))
 
 
@@ -311,33 +312,26 @@ def build_texts():
         notes = "".join(f'<p lang="ko">{esc(n)}</p>' for n in e["notes"])
         body = "".join(f'<p lang="ko">{esc(p)}</p>' for p in e["paras"])
         blocks.append(f"""<article class="essay prose" id="{e['slug']}">
-<p class="m mute">{L('Essay · written in Korean', '글')}</p>
+<p class="m mute">{L('Essay · written in Korean', '텍스트')}</p>
 <h2>{L(esc(ESSAY_EN[e['slug']]), esc(e['title']))}</h2>
 {sub}<p class="m by" lang="ko">{esc(e['author'])}</p>
 {body}
 <div class="notes">{notes}</div>
 </article>""")
-    mid = (f'<div class="lab"><span class="m">{L("Texts", "글")} <span class="pill">{len(TEXTS)}</span></span></div>'
+    mid = (f'<div class="lab"><span class="m">{L("Texts", "텍스트")} <span class="pill">{len(TEXTS)}</span></span></div>'
            f'<div class="toc" style="padding-top:8px">{toc}</div>' + "".join(blocks))
-    write("texts/index.html", page(rel=rel, path="texts/", title_en="Texts — Dasul Kim", title_ko="글 — 김다슬",
+    write("texts/index.html", page(rel=rel, path="texts/", title_en="Texts — Dasul Kim", title_ko="텍스트 — 김다슬",
                                    desc="Critical texts and exhibition forewords on the work of Dasul Kim.",
                                    mid=mid, right=side_index(rel, None), current="texts"))
 
 
 def build_contact():
     rel = "../"
-    form = f"""<form class="form" id="contact-form" data-to="{EMAIL}">
-<label><span class="m mute">{L('Name', '이름')}</span><input name="name" required autocomplete="name"></label>
-<label><span class="m mute">{L('Email', '이메일')}</span><input name="email" type="email" required autocomplete="email"></label>
-<label><span class="m mute">{L('Message', '메시지')}</span><textarea name="message" required></textarea></label>
-<button class="m" type="submit">{L('Send', '보내기')}</button>
-<p class="m mute" style="text-transform:none">{L('Opens your email app with the message filled in.', '메일 앱이 열리고 내용이 채워집니다.')}</p>
-</form>"""
-    mid = (f'<div class="lab"><span class="m">{L("Contact", "연락")}</span></div>'
-           f'<div class="prose"><p class="lead"><a class="u" href="mailto:{EMAIL}">{EMAIL}</a></p>'
-           f'<p class="m"><a class="u" href="{INSTAGRAM}" target="_blank" rel="noopener">Instagram ↗</a></p>{form}</div>')
+    mid = (f'<div class="lab"><span class="m">{L("Contact", "연락처")}</span></div>'
+           f'<div class="prose"><p class="lead"><a class="u" href="mailto:{EMAIL}">{EMAIL} ↗</a></p>'
+           f'<p class="lead"><a class="u" href="{INSTAGRAM}" target="_blank" rel="noopener">Instagram ↗</a></p></div>')
     write("contact/index.html", page(rel=rel, path="contact/", title_en="Contact — Dasul Kim",
-                                     title_ko="연락 — 김다슬", desc=f"Contact Dasul Kim: {EMAIL}",
+                                     title_ko="연락처 — 김다슬", desc=f"Contact Dasul Kim: {EMAIL}",
                                      mid=mid, right=side_index(rel, None), current="contact"))
 
 

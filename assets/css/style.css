@@ -54,7 +54,7 @@ html[lang="en"] .lang [data-set-lang="en"],html[lang="ko"] .lang [data-set-lang=
 /* works cards (home) */
 .work{padding:14px 0 18px;border-bottom:1px solid var(--line)}
 .work a.cover{display:block;text-decoration:none}
-.work img{width:100%;background:#f4f4f4}
+.work img{width:100%;height:auto;aspect-ratio:3/2;object-fit:contain;background:#f4f4f4}
 .work .row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px}
 .work .t{font-family:var(--mono);font-size:11px;text-transform:uppercase}
 .work .t a{text-decoration:none}
@@ -65,8 +65,8 @@ html[lang="en"] .lang [data-set-lang="en"],html[lang="ko"] .lang [data-set-lang=
 /* work page */
 .winfo h1{font-size:22px;line-height:1.2;font-weight:700;letter-spacing:-.02em;margin:8px 0}
 .winfo p{margin:0 0 14px}
-.fig{padding:14px 0 18px;border-bottom:1px solid var(--line)}
-.fig .cap{margin-top:8px;display:flex;justify-content:space-between}
+.fig{padding:0 0 12px}
+.fig:first-of-type{padding-top:14px}
 .fig video{width:100%;background:#000}
 .pager{display:flex;gap:16px;margin-top:22px}
 
@@ -81,6 +81,7 @@ html[lang="en"] .lang [data-set-lang="en"],html[lang="ko"] .lang [data-set-lang=
 .cv-sec{padding:14px 0 6px;border-bottom:1px solid var(--line)}
 .cv-sec>h2{margin-bottom:10px}
 .cv-row{display:grid;grid-template-columns:92px 1fr;gap:10px;font-size:12px;line-height:1.4;margin-bottom:8px}
+.cv-row.range{align-items:center}
 .cv-row .y{font-family:var(--mono);font-size:11px;color:var(--mute);text-transform:uppercase}
 .cv-more{padding:14px 0}
 
@@ -97,14 +98,6 @@ html[lang="en"] .lang [data-set-lang="en"],html[lang="ko"] .lang [data-set-lang=
 .toc a{display:block;padding:6px 0;border-bottom:1px solid var(--line);text-decoration:none;font-size:12.5px}
 .toc a:hover{background:#f6f9fd}
 
-/* contact */
-.form{display:grid;gap:12px;max-width:520px;margin-top:20px}
-.form label{display:grid;gap:4px}
-.form input,.form textarea{font:inherit;font-size:14px;border:1px solid var(--line);border-radius:0;padding:8px 10px;background:#fff;width:100%}
-.form textarea{min-height:140px;resize:vertical}
-.form input:focus,.form textarea:focus{border-color:#4b8bdc;outline:0}
-.form button{justify-self:start;border:1px solid var(--fg);padding:7px 16px;border-radius:30px}
-.form button:hover{background:var(--hl)}
 
 /* desktop: each column scrolls on its own */
 @media (min-width:960px){

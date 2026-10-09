@@ -49,6 +49,5 @@ Wix 요금제를 해지하기 전에 이 사이트가 정상으로 열리는지 
 
 ## 참고
 
-- 이메일 폼은 서버가 없어서 `mailto:`로 동작해요. 보내기를 누르면 방문자의 메일 앱이 열려요.
 - 영상은 Wix에 직접 올려둔 2개 작품(허공에서 수영하기, Temple of Flatness)만 파일로 포함돼 있어요. 나머지 작품은 정지 이미지예요.
 - 폰트: Pretendard, Geist Mono (둘 다 SIL OFL 1.1, `assets/fonts/LICENSE.txt`).
