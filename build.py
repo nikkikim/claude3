@@ -63,11 +63,11 @@ def write(path, content):
 
 MENU = [
     ("bio", "bio/", "Bio", "소개"),
-    ("statement", "statement/", "Artist Statement", "작가 노트"),
+    ("statement", "statement/", "Artist Statement", "작가노트"),
     ("works", "#works", "Works", "작업"),
-    ("cv", "cv/", "CV", "CV"),
-    ("texts", "texts/", "Texts", "텍스트"),
-    ("contact", "contact/", "Contact", "연락처"),
+    ("cv", "cv/", "CV", "이력"),
+    ("texts", "texts/", "Texts", "글"),
+    ("contact", "contact/", "Contact", "연락"),
 ]
 
 YEAR_RE = re.compile(
@@ -202,9 +202,9 @@ def build_home():
   <p class="m"><a class="u" href="bio/">{L('Full bio', '소개 전체 보기')}</a></p>
 </div>"""
     cv_inner = (bilingual_cv(only={0, 1, 2}, group_limit=8) +
-                f'<div class="cv-more m"><a class="u" href="cv/">{L("Full CV →", "CV 전체 보기 →")}</a><br>'
+                f'<div class="cv-more m"><a class="u" href="cv/">{L("Full CV →", "이력 전체 보기 →")}</a><br>'
                 f'<a class="u" href="{CV["portfolio"]}" target="_blank" rel="noopener">{L("Portfolio PDF ↗", "포트폴리오 PDF ↗")}</a></div>')
-    right = right_col(cv_inner, "CV", "CV", extra=f'<a class="u" href="cv/">{L("Full", "전체")}</a>')
+    right = right_col(cv_inner, "CV", "이력", extra=f'<a class="u" href="cv/">{L("Full", "전체")}</a>')
     write("index.html", page(
         rel="", path="", title_en="Dasul Kim — Media artist", title_ko="김다슬 — 미디어 아티스트",
         desc=DESC_EN, left_extra=intro, mid=mid, right=right, og_image=f"assets/works/{WORKS[0]['slug']}/cover.jpg"))
@@ -279,11 +279,11 @@ def build_bio():
 
 def build_statement():
     rel = "../"
-    mid = (f'<div class="lab"><span class="m">{L("Artist Statement", "작가 노트")}</span><span class="m mute">{L(NAME_EN, NAME_KO)}</span></div>'
+    mid = (f'<div class="lab"><span class="m">{L("Artist Statement", "작가노트")}</span><span class="m mute">{L(NAME_EN, NAME_KO)}</span></div>'
            f'<div class="prose"><div data-l="en" lang="en">{paras(STATEMENT["en"], "en")}</div>'
            f'<div data-l="ko" lang="ko">{paras(STATEMENT["ko"], "ko")}</div></div>')
     write("statement/index.html", page(rel=rel, path="statement/", title_en="Artist Statement — Dasul Kim",
-                                       title_ko="작가 노트 — 김다슬", desc=DESC_EN, mid=mid,
+                                       title_ko="작가노트 — 김다슬", desc=DESC_EN, mid=mid,
                                        right=side_index(rel, None), current="statement"))
 
 
@@ -291,7 +291,7 @@ def build_cv():
     rel = "../"
     mid = (f'<div class="lab"><span class="m">CV</span><span class="m mute"><a class="u" href="{CV["portfolio"]}" target="_blank" rel="noopener">{L("Portfolio PDF ↗", "포트폴리오 PDF ↗")}</a></span></div>'
            + bilingual_cv())
-    write("cv/index.html", page(rel=rel, path="cv/", title_en="CV — Dasul Kim", title_ko="CV — 김다슬",
+    write("cv/index.html", page(rel=rel, path="cv/", title_en="CV — Dasul Kim", title_ko="이력 — 김다슬",
                                 desc=DESC_EN, mid=mid, right=side_index(rel, None), current="cv"))
 
 
@@ -312,26 +312,26 @@ def build_texts():
         notes = "".join(f'<p lang="ko">{esc(n)}</p>' for n in e["notes"])
         body = "".join(f'<p lang="ko">{esc(p)}</p>' for p in e["paras"])
         blocks.append(f"""<article class="essay prose" id="{e['slug']}">
-<p class="m mute">{L('Essay · written in Korean', '텍스트')}</p>
+<p class="m mute">{L('Essay · written in Korean', '글')}</p>
 <h2>{L(esc(ESSAY_EN[e['slug']]), esc(e['title']))}</h2>
 {sub}<p class="m by" lang="ko">{esc(e['author'])}</p>
 {body}
 <div class="notes">{notes}</div>
 </article>""")
-    mid = (f'<div class="lab"><span class="m">{L("Texts", "텍스트")} <span class="pill">{len(TEXTS)}</span></span></div>'
+    mid = (f'<div class="lab"><span class="m">{L("Texts", "글")} <span class="pill">{len(TEXTS)}</span></span></div>'
            f'<div class="toc" style="padding-top:8px">{toc}</div>' + "".join(blocks))
-    write("texts/index.html", page(rel=rel, path="texts/", title_en="Texts — Dasul Kim", title_ko="텍스트 — 김다슬",
+    write("texts/index.html", page(rel=rel, path="texts/", title_en="Texts — Dasul Kim", title_ko="글 — 김다슬",
                                    desc="Critical texts and exhibition forewords on the work of Dasul Kim.",
                                    mid=mid, right=side_index(rel, None), current="texts"))
 
 
 def build_contact():
     rel = "../"
-    mid = (f'<div class="lab"><span class="m">{L("Contact", "연락처")}</span></div>'
+    mid = (f'<div class="lab"><span class="m">{L("Contact", "연락")}</span></div>'
            f'<div class="prose"><p class="lead"><a class="u" href="mailto:{EMAIL}">{EMAIL} ↗</a></p>'
            f'<p class="lead"><a class="u" href="{INSTAGRAM}" target="_blank" rel="noopener">Instagram ↗</a></p></div>')
     write("contact/index.html", page(rel=rel, path="contact/", title_en="Contact — Dasul Kim",
-                                     title_ko="연락처 — 김다슬", desc=f"Contact Dasul Kim: {EMAIL}",
+                                     title_ko="연락 — 김다슬", desc=f"Contact Dasul Kim: {EMAIL}",
                                      mid=mid, right=side_index(rel, None), current="contact"))
 
 
