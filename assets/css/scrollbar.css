@@ -23,5 +23,5 @@
   .sb .box:active,.sb .cap:active{background:#cfe0f7}
   .sb .track{flex:1 1 auto;position:relative;display:block;min-height:30px;touch-action:none}
   .sb .dia{position:absolute;left:1px;top:0;width:7px;height:7px;pointer-events:none;fill:var(--sb-ink)}
-  .sb:hover .dia{fill:#111}
+  .sb:hover .dia{fill:var(--hl);stroke:#b6d2f4;stroke-width:.8}
 }
