@@ -30,6 +30,9 @@ jobs:
       - name: Install Playwright (library only; the runner already has Google Chrome)
         run: npm install --no-save --prefix "$RUNNER_TEMP/pw" playwright-core
 
+      - name: Install qpdf (makes the PDF open quickly in browsers)
+        run: sudo apt-get install -y --no-install-recommends qpdf
+
       - name: Build the PDF
         env:
           NODE_PATH: ${{ runner.temp }}/pw/node_modules

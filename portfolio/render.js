@@ -260,5 +260,29 @@
     });
   }
 
-  root.Portfolio = { build: build, buildAll: buildAll, waitImages: waitImages, names: names, textHtml: textHtml, W: 1440, H: 810 };
+  /* PDF only: re-encode every picture at the size it is really shown (x factor), so the file stays small.
+     (Chromium puts the original JPEG into the PDF, however small it is displayed.) */
+  function shrink(container, factor, quality) {
+    var list = Array.prototype.slice.call(container.querySelectorAll('.spread img'));
+    return Promise.all(list.map(function (im) {
+      return new Promise(function (resolve) {
+        var nw = im.naturalWidth, nh = im.naturalHeight, r = im.getBoundingClientRect();
+        if (!nw || !nh || !r.width || !r.height) return resolve();
+        var s = Math.max(r.width / nw, r.height / nh) * factor;      // output pixels per source pixel
+        if (s >= 0.92) return resolve();                              // already about the right size
+        var c = document.createElement('canvas');
+        c.width = Math.max(1, Math.round(nw * s)); c.height = Math.max(1, Math.round(nh * s));
+        var ctx = c.getContext('2d');
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(im, 0, 0, c.width, c.height);
+        c.toBlob(function (blob) {
+          if (!blob) return resolve();
+          im.onload = im.onerror = function () { resolve(); };
+          im.src = URL.createObjectURL(blob);
+        }, 'image/jpeg', quality || 0.82);
+      });
+    }));
+  }
+
+  root.Portfolio = { shrink: shrink, build: build, buildAll: buildAll, waitImages: waitImages, names: names, textHtml: textHtml, W: 1440, H: 810 };
 })(window);

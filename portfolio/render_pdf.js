@@ -45,5 +45,11 @@ function serve() {
     margin: { top: 0, right: 0, bottom: 0, left: 0 } });
   await browser.close();
   srv.close();
+  // "fast web view": a linearized PDF shows its first page before the whole file has arrived (needs the qpdf tool)
+  const { spawnSync } = require('child_process');
+  const tmp = OUT + '.lin';
+  const q = spawnSync('qpdf', ['--linearize', OUT, tmp], { stdio: 'pipe' });
+  if (q.status === 0 || q.status === 3) { fs.renameSync(tmp, OUT); console.log('linearized'); }
+  else { if (fs.existsSync(tmp)) fs.unlinkSync(tmp); console.log('qpdf not available: PDF not linearized'); }
   console.log(`wrote ${OUT} (${(fs.statSync(OUT).size / 1e6).toFixed(1)} MB, ${count} spreads)`);
 })().catch((e) => { console.error(e); process.exit(1); });
