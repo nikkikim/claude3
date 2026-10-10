@@ -8,11 +8,11 @@ Preview:  python3 -m http.server 8000   (then open http://localhost:8000)
 import html
 import json
 import os
+import hashlib
 import re
 import shutil
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
-SITE = "https://www.dasulkim.com"
 NAME_EN, NAME_KO = "Dasul Kim", "김다슬"
 
 esc = html.escape
@@ -29,6 +29,8 @@ STATEMENT = load("statement.json")
 CV = load("cv.json")
 TEXTS = load("texts.json")
 SITE_INFO = load("site.json")
+# the address link previews (og:image, canonical) point to; set it in the admin if the site lives somewhere else
+SITE = (SITE_INFO.get("site_url") or "https://www.dasulkim.com").strip().rstrip("/")
 EMAIL = SITE_INFO["email"]
 INSTAGRAM = SITE_INFO["instagram"]
 PORTFOLIO = SITE_INFO["portfolio"]
@@ -78,14 +80,119 @@ def write(path, content):
         f.write(content)
 
 
-MENU = [
-    ("bio", "bio/", "Bio", "소개"),
-    ("statement", "statement/", "Artist Statement", "작가노트"),
-    ("works", "#works", "Works", "작업"),
-    ("cv", "cv/", "CV", "이력"),
-    ("texts", "texts/", "Texts", "글"),
-    ("contact", "contact/", "Contact", "연락"),
-]
+# ---------------------------------------------------------------- menu & pages (content/pages.json)
+# Built-in pages keep their layout; custom pages are plain text pages made in the admin.
+# status: "menu" = listed in the menu, "hidden" = published but not in the menu (noindex, link only),
+#         "draft" = not published (custom pages only).
+BUILTIN = {
+    "bio": ("bio/", "Bio", "소개"),
+    "statement": ("statement/", "Artist Statement", "작가노트"),
+    "works": ("#works", "Works", "작업"),
+    "cv": ("cv/", "CV", "이력"),
+    "texts": ("texts/", "Texts", "글"),
+    "contact": ("contact/", "Contact", "연락"),
+}
+RESERVED = set(BUILTIN) | {"admin", "assets", "content", "index", "404", "sitemap", "robots", "favicon", "cname", "node_modules"}
+SLUG_RE = re.compile(r"^[a-z0-9][a-z0-9-]{0,59}$")
+
+
+def load_pages():
+    try:
+        raw = load("pages.json")
+    except FileNotFoundError:
+        raw = []
+    out, seen, slugs = [], set(), set()
+    for p in raw:
+        pid = p.get("id")
+        if not pid or pid in seen:
+            continue
+        if p.get("type") == "builtin":
+            if pid not in BUILTIN:
+                continue
+            _, en, ko = BUILTIN[pid]
+            out.append({"id": pid, "type": "builtin", "title_en": (p.get("title_en") or en).strip(),
+                        "title_ko": (p.get("title_ko") or ko).strip(),
+                        "status": "hidden" if p.get("status") == "hidden" else "menu"})
+        else:
+            slug = p.get("slug", "")
+            if not SLUG_RE.match(slug) or slug in RESERVED or slug in slugs:
+                print(f"skipped page {pid!r}: bad or duplicate address {slug!r}")
+                continue
+            slugs.add(slug)
+            q = dict(p)
+            q.update({"type": "custom", "status": p.get("status") if p.get("status") in ("menu", "hidden", "draft") else "draft",
+                      "title_en": (p.get("title_en") or slug).strip()})
+            q["title_ko"] = (p.get("title_ko") or "").strip() or q["title_en"]
+            out.append(q)
+        seen.add(pid)
+    for pid, (_, en, ko) in BUILTIN.items():      # a built-in page can never go missing
+        if pid not in seen:
+            out.append({"id": pid, "type": "builtin", "title_en": en, "title_ko": ko, "status": "menu"})
+    return out
+
+
+PAGES = load_pages()
+PAGE = {p["id"]: p for p in PAGES}
+
+
+def T(pid):
+    """(English, Korean) title of a built-in page, as set in the admin; already HTML-escaped"""
+    return esc(PAGE[pid]["title_en"]), esc(PAGE[pid]["title_ko"])
+
+
+def menu_items():
+    for p in PAGES:
+        if p["status"] != "menu":
+            continue
+        href = BUILTIN[p["id"]][0] if p["type"] == "builtin" else p["slug"] + "/"
+        yield p["id"], href, p["title_en"], p["title_ko"]
+
+
+def file_hash(rel):
+    full = os.path.join(ROOT, rel)
+    if not os.path.isfile(full):
+        return None
+    with open(full, "rb") as f:
+        return hashlib.md5(f.read()).hexdigest()[:8]
+
+
+def asset_url(rel, absolute=False):
+    """URL of a site file with a version tag (so a replaced favicon/preview image is not served from a stale cache)"""
+    v = file_hash(rel)
+    if not v:
+        return None
+    return (SITE + "/" if absolute else "") + f"{rel}?v={v}"
+
+
+# a text page body: blank line = new paragraph, "## " = heading, [text](https://…) = link
+LINK_RE = re.compile(r"\[([^\]]+)\]\(([^)\s]+)\)")
+SAFE_URL = re.compile(r"^(https?://|mailto:|/|\./|\.\./|#)")
+
+
+def md_inline(t):
+    out, pos = [], 0
+    for m in LINK_RE.finditer(t):
+        out.append(esc(t[pos:m.start()]))
+        url = m.group(2)
+        if SAFE_URL.match(url):
+            ext = ' target="_blank" rel="noopener"' if re.match(r"^https?://", url) else ""
+            out.append(f'<a class="u" href="{esc(url, quote=True)}"{ext}>{esc(m.group(1))}</a>')
+        else:
+            out.append(esc(m.group(0)))
+        pos = m.end()
+    out.append(esc(t[pos:]))
+    return "".join(out).replace("\n", "<br>")
+
+
+def md(text):
+    blocks = []
+    for b in re.split(r"\n\s*\n", (text or "").strip()):
+        b = b.strip()
+        if not b:
+            continue
+        blocks.append(f"<h3>{md_inline(b[3:].strip())}</h3>" if b.startswith("## ") and "\n" not in b else f"<p>{md_inline(b)}</p>")
+    return "".join(blocks)
+
 
 YEAR_RE = re.compile(
     r"^((?:19|20)\d{2}(?:\.\d{1,2}){0,2}\.?(?:\s*[-–]\s*(?:(?:19|20)\d{2}(?:\.\d{1,2}){0,2}|Current|현재|Present))?"
@@ -142,10 +249,23 @@ def index_list(rel, current=None):
     return '<nav class="idx" aria-label="Works index">' + "".join(rows) + "</nav>"
 
 
+def icon_links(rel):
+    out = []
+    for fn, extra in (("favicon.ico", ' sizes="48x48"'), ("favicon-32.png", ' type="image/png" sizes="32x32"'),
+                      ("favicon-192.png", ' type="image/png" sizes="192x192"')):
+        u = asset_url("assets/" + fn)
+        if u:
+            out.append(f'<link rel="icon" href="{rel}{u}"{extra}>')
+    u = asset_url("assets/apple-touch-icon.png")
+    if u:
+        out.append(f'<link rel="apple-touch-icon" href="{rel}{u}">')
+    return "\n".join(out)
+
+
 def page(*, rel, path, title_en, title_ko, desc, left_extra="", mid, right, current=None,
-         og_image=None, canonical=None):
+         og_image=None, canonical=None, noindex=False, extra_head="", scripts=()):
     menu = []
-    for key, href, en, ko in MENU:
+    for key, href, en, ko in menu_items():
         cur = ' aria-current="page"' if key == current else ""
         menu.append(f'<a href="{rel}{href}"{cur}>{L(esc(en), esc(ko))}</a>')
     menu_html = (
@@ -153,7 +273,20 @@ def page(*, rel, path, title_en, title_ko, desc, left_extra="", mid, right, curr
         f'<a href="{INSTAGRAM}" rel="noopener" target="_blank">Instagram ↗</a>'
         f'<a href="mailto:{EMAIL}">{esc(EMAIL)} ↗</a>'
     )
-    og = f'<meta property="og:image" content="{SITE}/{og_image}">' if og_image else ""
+    # a work page shows its own cover; every other page shows the preview image uploaded in the admin (if any)
+    site_og = asset_url("assets/og.jpg", absolute=True)
+    if og_image:
+        og = f'<meta property="og:image" content="{SITE}/{og_image}">\n<meta name="twitter:image" content="{SITE}/{og_image}">'
+    elif site_og:
+        og = (f'<meta property="og:image" content="{site_og}">\n<meta property="og:image:width" content="1200">\n'
+              f'<meta property="og:image:height" content="630">\n<meta name="twitter:image" content="{site_og}">')
+    else:
+        og = ""
+    card = "summary_large_image" if (og_image or site_og) else "summary"
+    og = og + "\n" if og else ""
+    robots = '<meta name="robots" content="noindex">\n' if noindex else ""
+    extra_head = extra_head + "\n" if extra_head else ""
+    script_tags = "".join(f'<script src="{rel}assets/js/{n}" defer></script>\n' for n in scripts)
     canon = canonical or (SITE + "/" + path)
     return f"""<!doctype html>
 <html lang="en">
@@ -169,19 +302,17 @@ def page(*, rel, path, title_en, title_ko, desc, left_extra="", mid, right, curr
 <meta property="og:description" content="{esc(desc)}">
 <meta property="og:type" content="website">
 <meta property="og:url" content="{canon}">
-{og}
-<meta name="twitter:card" content="summary_large_image">
+{og}<meta name="twitter:card" content="{card}">
+{robots}{extra_head}
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#ffffff">
 <script>(function(){{var t='light';try{{if(localStorage.getItem('theme')==='dark')t='dark';}}catch(e){{}}document.documentElement.dataset.theme=t;var m=document.querySelector('meta[name="theme-color"]');if(m)m.content=t==='dark'?'#111111':'#ffffff';}})();</script>
-<link rel="icon" href="{rel}assets/favicon.ico" sizes="48x48">
-<link rel="icon" href="{rel}assets/favicon-32.png" type="image/png" sizes="32x32">
-<link rel="icon" href="{rel}assets/favicon-192.png" type="image/png" sizes="192x192">
-<link rel="apple-touch-icon" href="{rel}assets/apple-touch-icon.png">
+{icon_links(rel)}
 <link rel="preload" href="{rel}assets/fonts/Pretendard-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{rel}assets/css/style.css">
 <link rel="stylesheet" href="{rel}assets/css/cursor.css">
 <link rel="stylesheet" href="{rel}assets/css/scrollbar.css">
+<link rel="stylesheet" href="{rel}assets/css/mobile-fx.css">
 </head>
 <body data-title-en="{esc(title_en)}" data-title-ko="{esc(title_ko)}">
 <a class="skip" href="#main">Skip to content</a>
@@ -207,7 +338,8 @@ def page(*, rel, path, title_en, title_ko, desc, left_extra="", mid, right, curr
 <script src="{rel}assets/js/site.js" defer></script>
 <script src="{rel}assets/js/cursor.js" defer></script>
 <script src="{rel}assets/js/scrollbar.js" defer></script>
-</body>
+<script src="{rel}assets/js/mobile-fx.js" defer></script>
+{script_tags}</body>
 </html>
 """
 
@@ -231,7 +363,7 @@ def build_home():
 <a class="cover" href="{href}" aria-label="{t_en}"><img src="assets/works/{w['slug']}/cover.jpg" width="{cw}" height="{ch}" alt="{esc(w['title_en'])}" loading="{'eager' if w['n'] <= 2 else 'lazy'}" decoding="async"></a>
 <div class="row"><div class="t">{w['n']:02d}. <a href="{href}">{L(t_en, t_ko)}</a></div><div class="d"><i>{meta}</i></div></div>
 </article>""")
-    mid = (f'<div class="lab"><span class="m" id="works">{L("Works", "작업")} <span class="pill">{len(WORKS)}</span></span>'
+    mid = (f'<div class="lab"><span class="m" id="works">{L(*T("works"))} <span class="pill">{len(WORKS)}</span></span>'
            f'<span class="m mute">{WORKS[-1]["year"]}–{WORKS[0]["year"]}</span></div>' + "".join(cards))
     intro = f"""<div class="intro">
   <div data-l="en" lang="en"><p>{esc(DESC_EN)}</p></div>
@@ -240,10 +372,10 @@ def build_home():
 </div>"""
     cv_inner = (bilingual_cv(home_only=True) +
                 f'<div class="cv-more m"><a class="u" href="cv/">{L("Full CV →", "이력 전체 →")}</a>{portfolio_link("")}</div>')
-    right = right_col(cv_inner, "CV", "이력", extra=f'<a class="u" href="cv/">{L("Full", "전체")}</a>')
+    right = right_col(cv_inner, PAGE["cv"]["title_en"], PAGE["cv"]["title_ko"], extra=f'<a class="u" href="cv/">{L("Full", "전체")}</a>')
     write("index.html", page(
         rel="", path="", title_en="Dasul Kim — Media artist", title_ko="김다슬 — 미디어 아티스트",
-        desc=DESC_EN, left_extra=intro, mid=mid, right=right, og_image=f"assets/works/{WORKS[0]['slug']}/cover.jpg"))
+        desc=DESC_EN, left_extra=intro, mid=mid, right=right))
 
 
 # ---------------------------------------------------------------- work pages
@@ -270,7 +402,7 @@ def build_works():
         medium = (f'<p class="m">{L("Medium", "매체")}<br><span class="mute" style="text-transform:none">{esc(w["medium"])}</span></p>'
                   if w["medium"] else "")
         info = f"""<div class="winfo intro">
-<a class="m u" href="{rel}#works">← {L('Works', '작업')}</a>
+<a class="m u" href="{rel}#works">← {L(*T('works'))}</a>
 <h1>{L(esc(w['title_en']), esc(w['title_ko']))}</h1>
 <p class="m mute">{w['year']} · {w['n']:02d} / {total:02d}</p>
 {medium}
@@ -305,29 +437,32 @@ def side_index(rel, current):
 
 def build_bio():
     rel = "../"
-    mid = (f'<div class="lab"><span class="m">{L("Bio", "소개")}</span><span class="m mute">{L(NAME_EN, NAME_KO)}</span></div>'
+    mid = (f'<div class="lab"><span class="m">{L(*T("bio"))}</span><span class="m mute">{L(NAME_EN, NAME_KO)}</span></div>'
            f'<div class="prose"><div data-l="en" lang="en">{paras(BIO["en"], "en")}</div>'
            f'<div data-l="ko" lang="ko">{paras(BIO["ko"], "ko")}</div>'
            f'<p class="m"><a class="u" href="{rel}cv/">CV →</a> &nbsp; <a class="u" href="mailto:{EMAIL}">{EMAIL}</a></p></div>')
-    write("bio/index.html", page(rel=rel, path="bio/", title_en="Bio — Dasul Kim", title_ko="소개 — 김다슬",
+    write("bio/index.html", page(rel=rel, path="bio/", title_en=f"{PAGE['bio']['title_en']} — {NAME_EN}",
+                                 title_ko=f"{PAGE['bio']['title_ko']} — {NAME_KO}",
                                  desc=DESC_EN, mid=mid, right=side_index(rel, None), current="bio"))
 
 
 def build_statement():
     rel = "../"
-    mid = (f'<div class="lab"><span class="m">{L("Artist Statement", "작가노트")}</span><span class="m mute">{L(NAME_EN, NAME_KO)}</span></div>'
+    mid = (f'<div class="lab"><span class="m">{L(*T("statement"))}</span><span class="m mute">{L(NAME_EN, NAME_KO)}</span></div>'
            f'<div class="prose"><div data-l="en" lang="en">{paras(STATEMENT["en"], "en")}</div>'
            f'<div data-l="ko" lang="ko">{paras(STATEMENT["ko"], "ko")}</div></div>')
-    write("statement/index.html", page(rel=rel, path="statement/", title_en="Artist Statement — Dasul Kim",
-                                       title_ko="작가노트 — 김다슬", desc=DESC_EN, mid=mid,
+    write("statement/index.html", page(rel=rel, path="statement/",
+                                       title_en=f"{PAGE['statement']['title_en']} — {NAME_EN}",
+                                       title_ko=f"{PAGE['statement']['title_ko']} — {NAME_KO}", desc=DESC_EN, mid=mid,
                                        right=side_index(rel, None), current="statement"))
 
 
 def build_cv():
     rel = "../"
-    mid = (f'<div class="lab"><span class="m">CV</span><span class="m mute">{portfolio_link(rel, False)}</span></div>'
+    mid = (f'<div class="lab"><span class="m">{L(*T("cv"))}</span><span class="m mute">{portfolio_link(rel, False)}</span></div>'
            + bilingual_cv())
-    write("cv/index.html", page(rel=rel, path="cv/", title_en="CV — Dasul Kim", title_ko="이력 — 김다슬",
+    write("cv/index.html", page(rel=rel, path="cv/", title_en=f"{PAGE['cv']['title_en']} — {NAME_EN}",
+                                title_ko=f"{PAGE['cv']['title_ko']} — {NAME_KO}",
                                 desc=DESC_EN, mid=mid, right=side_index(rel, None), current="cv"))
 
 
@@ -351,20 +486,73 @@ def build_texts():
 {body}
 <div class="notes">{notes}</div>
 </article>""")
-    mid = (f'<div class="lab"><span class="m">{L("Texts", "글")} <span class="pill">{len(TEXTS)}</span></span></div>'
+    mid = (f'<div class="lab"><span class="m">{L(*T("texts"))} <span class="pill">{len(TEXTS)}</span></span></div>'
            f'<div class="toc" style="padding-top:8px">{toc}</div>' + "".join(blocks))
-    write("texts/index.html", page(rel=rel, path="texts/", title_en="Texts — Dasul Kim", title_ko="글 — 김다슬",
+    write("texts/index.html", page(rel=rel, path="texts/", title_en=f"{PAGE['texts']['title_en']} — {NAME_EN}",
+                                   title_ko=f"{PAGE['texts']['title_ko']} — {NAME_KO}",
                                    desc="Critical texts and exhibition forewords on the work of Dasul Kim.",
                                    mid=mid, right=side_index(rel, None), current="texts"))
 
 
 def build_contact():
     rel = "../"
-    mid = (f'<div class="lab"><span class="m">{L("Contact", "연락")}</span></div>'
+    mid = (f'<div class="lab"><span class="m">{L(*T("contact"))}</span></div>'
            f'<div class="prose"><p class="lead"><a class="u" href="mailto:{EMAIL}">{EMAIL} ↗</a></p></div>')
-    write("contact/index.html", page(rel=rel, path="contact/", title_en="Contact — Dasul Kim",
-                                     title_ko="연락 — 김다슬", desc=f"Contact Dasul Kim: {EMAIL}",
+    write("contact/index.html", page(rel=rel, path="contact/", title_en=f"{PAGE['contact']['title_en']} — {NAME_EN}",
+                                     title_ko=f"{PAGE['contact']['title_ko']} — {NAME_KO}", desc=f"Contact Dasul Kim: {EMAIL}",
                                      mid=mid, right=side_index(rel, None), current="contact"))
+
+
+def lock_ok(p):
+    k = p.get("locked")
+    return bool(isinstance(k, dict) and k.get("salt") and k.get("iv") and k.get("ct"))
+
+
+def build_custom_pages():
+    """pages made in the admin -> <slug>/index.html; pages that were removed or turned into drafts are cleaned up"""
+    keep = {p["slug"] for p in PAGES if p["type"] == "custom" and p["status"] != "draft"}
+    for name in os.listdir(ROOT):                      # earlier custom pages carry a marker
+        f = os.path.join(ROOT, name, "index.html")
+        if name not in keep and os.path.isfile(f):
+            with open(f, encoding="utf-8") as fh:
+                if 'name="dk-page"' in fh.read(2000):
+                    shutil.rmtree(os.path.join(ROOT, name))
+    for p in PAGES:
+        if p["type"] != "custom" or p["status"] == "draft":
+            continue
+        rel = "../"
+        en, ko = esc(p["title_en"]), esc(p["title_ko"])
+        locked = lock_ok(p)
+        if locked:
+            k = p["locked"]
+            data = json.dumps({"v": 1, "salt": k["salt"], "iv": k["iv"], "ct": k["ct"], "hint": k.get("hint", "")},
+                              ensure_ascii=False).replace("<", "\\u003c")
+            body = f"""<div class="prose lockbox" data-lock>
+<p class="lead">{L("This page is password protected.", "비밀번호가 필요한 페이지예요.")}</p>
+<form class="lockform" autocomplete="off">
+<input type="password" name="pw" required autocomplete="off" aria-label="Password / 비밀번호" placeholder="Password / 비밀번호">
+<button type="submit" class="m">{L("Open", "열기")}</button>
+</form>
+<p class="m mute lockhint"></p>
+<p class="m lockerr" role="alert"></p>
+<script type="application/json" class="lock-data">{data}</script>
+<div class="lock-out"></div>
+<noscript><p class="m">JavaScript is required.</p></noscript>
+</div>"""
+            desc = DESC_EN
+        else:
+            body_en = p.get("body_en", "")
+            body_ko = p.get("body_ko") or body_en
+            body = (f'<div class="prose"><div data-l="en" lang="en">{md(body_en)}</div>'
+                    f'<div data-l="ko" lang="ko">{md(body_ko)}</div></div>')
+            first = re.sub(r"\s+", " ", re.sub(r"[#\[\]()]", "", body_en)).strip()
+            desc = (first[:157] + "…") if len(first) > 158 else (first or DESC_EN)
+        mid = f'<div class="lab"><span class="m">{L(en, ko)}</span></div>' + body
+        write(f"{p['slug']}/index.html", page(
+            rel=rel, path=f"{p['slug']}/", title_en=f"{p['title_en']} — {NAME_EN}", title_ko=f"{p['title_ko']} — {NAME_KO}",
+            desc=desc, mid=mid, right=side_index(rel, None), current=p["id"],
+            noindex=(p["status"] == "hidden" or locked), extra_head='<meta name="dk-page" content="custom">',
+            scripts=("lock.js",) if locked else ()))
 
 
 def build_404():
@@ -376,12 +564,21 @@ def build_404():
 
 
 def build_meta():
-    urls = [""] + [f"{p}/" for p in ("bio", "statement", "cv", "texts", "contact")] + [f"works/{w['slug']}/" for w in WORKS]
+    urls = [""]
+    for p in PAGES:           # hidden pages stay out of the sitemap (they are reachable by link only)
+        if p["status"] != "menu" or p["id"] == "works":
+            continue
+        urls.append(BUILTIN[p["id"]][0] if p["type"] == "builtin" else p["slug"] + "/")
+    urls += [f"works/{w['slug']}/" for w in WORKS]
     items = "".join(f"<url><loc>{SITE}/{u}</loc></url>" for u in urls)
     write("sitemap.xml", f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{items}</urlset>\n')
     write("robots.txt", f"User-agent: *\nAllow: /\nSitemap: {SITE}/sitemap.xml\n")
     write(".nojekyll", "")
-    shutil.copyfile(os.path.join(ROOT, "assets", "favicon.ico"), os.path.join(ROOT, "favicon.ico"))  # browsers ask for /favicon.ico
+    src, dst = os.path.join(ROOT, "assets", "favicon.ico"), os.path.join(ROOT, "favicon.ico")
+    if os.path.isfile(src):                            # browsers ask for /favicon.ico
+        shutil.copyfile(src, dst)
+    elif os.path.isfile(dst):
+        os.remove(dst)
 
 
 if __name__ == "__main__":
@@ -392,6 +589,7 @@ if __name__ == "__main__":
     build_cv()
     build_texts()
     build_contact()
+    build_custom_pages()
     build_404()
     build_meta()
     print(f"built {len(WORKS)} works")

@@ -98,6 +98,35 @@ input:focus,textarea:focus,select:focus{border-color:#4b8bdc;outline:0}
 .check{display:flex;gap:8px;align-items:center;margin-bottom:10px}
 .check input{width:auto}
 
+/* menu & pages */
+.prow{display:grid;grid-template-columns:28px 1fr auto;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}
+.prow .num{font-family:var(--mono);font-size:11px;color:var(--mute)}
+.prow .t{cursor:pointer;min-width:0}
+.prow .t:hover b{background:var(--hl)}
+.prow .t b{font-weight:700}
+.prow .t span:not(.tag){display:block;font-size:12px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prow .ctl{display:flex;gap:4px}
+.prow.off .t b{color:var(--mute)}
+.prow .tag{font-family:var(--mono);font-size:10px;background:var(--hl);border-radius:20px;padding:0 7px;margin-left:6px;text-transform:uppercase;display:inline-block}
+.tag.soft{background:#eee!important}
+.menuprev{margin:0 0 14px;padding:8px 10px;background:#fafafa;border:1px solid var(--line);text-transform:none}
+.radios{display:grid;gap:8px;margin-bottom:16px}
+.radio{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);padding:9px 12px;cursor:pointer}
+.radio:hover{background:#f6f9fd}
+.radio input{width:auto;margin-top:4px}
+.radio b{display:block;font-weight:700}
+.lockbox{border:1px solid var(--line);padding:12px 14px;margin:6px 0 4px;background:#fafafa}
+.lockbox .check{margin-bottom:4px;font-weight:700}
+.lockedit{margin-top:12px}
+.inline{display:flex;gap:8px;max-width:420px}
+.inline input{flex:1}
+
+/* favicon & preview image */
+.favrow{display:flex;gap:14px;align-items:center;margin-bottom:10px}
+.favrow img{background:repeating-conic-gradient(#eee 0 25%,#fff 0 50%) 0 0/12px 12px;border:1px solid var(--line)}
+.ogimg{display:block;width:100%;max-width:480px;aspect-ratio:1200/630;object-fit:cover;border:1px solid var(--line);margin-bottom:10px;background:#f4f4f4}
+.ctl2{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+
 #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--fg);color:#fff;padding:9px 16px;border-radius:30px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50;max-width:90vw}
 #toast.show{opacity:1}
 

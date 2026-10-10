@@ -2,6 +2,7 @@
 @font-face{font-family:"Pretendard";src:url(../fonts/Pretendard-Bold.woff2) format("woff2");font-weight:700;font-display:swap}
 @font-face{font-family:"Geist Mono";src:url(../fonts/GeistMono-Regular.woff2) format("woff2");font-weight:400;font-display:swap}
 @font-face{font-family:"Geist Mono";src:url(../fonts/GeistMono-Medium.woff2) format("woff2");font-weight:500;font-display:swap}
+@font-face{font-family:"Geist Mono";src:url(../fonts/GeistMono-Bold.woff2) format("woff2");font-weight:700;font-display:swap}
 
 :root{
   --bg:#fff;--fg:#111;--mute:#8d8d8d;--line:#e3e3e3;--hl:#d9e8fb;--thumb:#f4f4f4;--hover:#f6f9fd;
@@ -48,7 +49,7 @@ a.u:hover,.menu a:hover,.link:hover{background:var(--hl)}
 .col{border-left:1px solid var(--line);padding:0 14px 40px;min-width:0}
 .col.left{border-left:0}
 .lab{height:72px;padding-top:14px;border-bottom:1px solid var(--line);margin:0 -14px;padding-left:14px;padding-right:14px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:var(--bg);position:sticky;top:0;z-index:3}
-.lab .name{text-decoration:none}
+.lab .name{text-decoration:none;font-weight:700}
 .lab .name:hover{background:var(--hl)}
 .lang{display:flex;gap:6px;align-items:center;white-space:nowrap}
 .lang button{padding:0 2px;color:var(--mute);text-transform:uppercase}
@@ -142,3 +143,13 @@ html[lang="en"] .lang [data-set-lang="en"],html[lang="ko"] .lang [data-set-lang=
   .to-top:active{background:var(--hl)}
 }
 @media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+
+/* text pages made in the admin */
+.prose h3{font-size:15px;font-weight:700;line-height:1.4;letter-spacing:-.01em;margin:24px 0 8px}
+.lockform{display:flex;gap:8px;max-width:360px;margin:6px 0 12px}
+.lockform input{flex:1;min-width:0;font:inherit;font-size:14px;padding:8px 10px;border:1px solid var(--fg);border-radius:0;background:var(--bg);color:var(--fg)}
+.lockform button{border:1px solid var(--fg);border-radius:30px;padding:0 16px;white-space:nowrap}
+@media (hover:hover){.lockform button:hover{background:var(--hl)}}
+.lockbox [hidden]{display:none!important}
+.lockerr{color:#c0392b;min-height:1.4em}
+.lockhint{margin-bottom:8px}

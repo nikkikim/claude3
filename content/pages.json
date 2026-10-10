@@ -1,0 +1,8 @@
+[
+ {"id": "bio", "type": "builtin", "title_en": "Bio", "title_ko": "소개", "status": "menu"},
+ {"id": "statement", "type": "builtin", "title_en": "Artist Statement", "title_ko": "작가노트", "status": "menu"},
+ {"id": "works", "type": "builtin", "title_en": "Works", "title_ko": "작업", "status": "menu"},
+ {"id": "cv", "type": "builtin", "title_en": "CV", "title_ko": "이력", "status": "menu"},
+ {"id": "texts", "type": "builtin", "title_en": "Texts", "title_ko": "글", "status": "menu"},
+ {"id": "contact", "type": "builtin", "title_en": "Contact", "title_ko": "연락", "status": "menu"}
+]

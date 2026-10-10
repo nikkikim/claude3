@@ -8,6 +8,7 @@ on:
     paths:
       - 'content/**'
       - 'assets/works/**'
+      - 'assets/*'
       - 'build.py'
   workflow_dispatch:
 
