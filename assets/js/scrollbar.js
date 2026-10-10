@@ -10,7 +10,7 @@
   var mq = window.matchMedia('(min-width: 960px)');
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var behavior = reduce ? 'auto' : 'smooth';
-  var TOP = 84, BOTTOM = 16, WIDTH = 11, INSET = 5, DIA = 7;
+  var TOP = 62, BOTTOM = 16, WIDTH = 11, INSET = 5, DIA = 7;
 
   var ICON = {
     down: '<svg viewBox="0 0 7 9"><path d="M3.5 1v6M1 5l2.5 2.5L6 5"/></svg>',

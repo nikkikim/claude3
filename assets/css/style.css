@@ -55,7 +55,7 @@ a.u:hover,.menu a:hover,.link:hover{background:var(--hl)}
 .cols{display:grid;grid-template-columns:25% 46% 29%}
 .col{border-left:1px solid var(--line);padding:0 14px 40px;min-width:0}
 .col.left{border-left:0}
-.lab{height:72px;padding-top:14px;border-bottom:1px solid var(--line);margin:0 -14px;padding-left:14px;padding-right:14px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:var(--bg);position:sticky;top:0;z-index:3}
+.lab{flex:none;height:50px;padding-top:14px;border-bottom:1px solid var(--line);margin:0 -14px;padding-left:14px;padding-right:14px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:var(--bg);position:sticky;top:0;z-index:3}
 .brand{display:flex;align-items:center;gap:8px;height:22px}
 .lab .name{text-decoration:none}
 .lab .name:hover{background:var(--hl)}
@@ -145,7 +145,8 @@ html[data-theme="dark"] .tbar .now{background:#fff}
   .menu,.intro,.winfo,.clock{padding-left:14px;padding-right:14px}
   .menu{flex-direction:row;flex-wrap:wrap;gap:6px 16px;padding-top:12px}
   .menu .gap{display:none}
-  .clock{padding-bottom:20px;border-bottom:1px solid var(--line)}
+  .clock{display:none}                                   /* no clock / daylight strip on mobile */
+  .col.left>:nth-last-child(2){padding-bottom:20px;border-bottom:1px solid var(--line)}
   .work .row{grid-template-columns:1fr}
   .cv-row{grid-template-columns:78px 1fr}
   .col.right.idx-only{display:none}
