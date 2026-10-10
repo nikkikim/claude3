@@ -369,11 +369,13 @@ def page(*, rel, path, title_en, title_ko, desc, left_extra="", mid, right, curr
 <div class="cols">
 <aside class="col left">
   <div class="lab">
-    <a class="name m" href="{rel or './'}">{L(NAME_EN, NAME_KO)}</a>
+    <div class="brand"><a class="name m" href="{rel or './'}">{L(NAME_EN, NAME_KO)}</a>
+    <button type="button" class="bento" aria-expanded="false" aria-controls="bento-panel" aria-label="Menu / 메뉴" title="Menu"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="2" cy="2" r="1.3"/><circle cx="7" cy="2" r="1.3"/><circle cx="12" cy="2" r="1.3"/><circle cx="2" cy="7" r="1.3"/><circle cx="7" cy="7" r="1.3"/><circle cx="12" cy="7" r="1.3"/><circle cx="2" cy="12" r="1.3"/><circle cx="7" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/></svg></button></div>
     <div class="tools">
     <div class="lang m" role="group" aria-label="Language"><button type="button" data-set-lang="en" aria-pressed="true">EN</button><span class="sep">/</span><button type="button" data-set-lang="ko" aria-pressed="false">KR</button></div>
     <button type="button" class="theme" data-theme-toggle aria-pressed="false" aria-label="Dark mode" title="Dark / Light"><svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.6A8.2 8.2 0 0 1 9.4 4a8.2 8.2 0 1 0 10.6 10.6z"/></svg><svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5.3 5.3l1.7 1.7M17 17l1.7 1.7M5.3 18.7 7 17M17 7l1.7-1.7"/></svg></button>
     </div>
+    <nav class="bento-panel m" id="bento-panel" aria-label="Menu" hidden>{menu_html}</nav>
   </div>
   <nav class="menu m" aria-label="Main">{menu_html}</nav>
   {left_extra}
@@ -530,7 +532,7 @@ def build_texts():
         notes = "".join(f'<p lang="ko">{esc(n)}</p>' for n in e["notes"])
         body = "".join(f'<p lang="ko">{esc(p)}</p>' for p in e["paras"])
         blocks.append(f"""<article class="essay prose" id="{e['slug']}">
-<p class="m mute">{L('Essay · written in Korean', '글')}</p>
+<p class="m mute">{L('Written in Korean', '글')}</p>
 <h2>{L(esc(essay_en(e)), esc(e['title']))}</h2>
 {sub}<p class="m by" lang="ko">{esc(e['author'])}</p>
 {body}

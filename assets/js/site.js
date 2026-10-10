@@ -71,4 +71,18 @@
       window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
     });
   }
+
+  // bento menu (mobile): open the menu from anywhere on the page
+  var bento = document.querySelector('.bento'), panel = document.getElementById('bento-panel');
+  if (bento && panel) {
+    var setBento = function (open) {
+      panel.hidden = !open;
+      bento.setAttribute('aria-expanded', open ? 'true' : 'false');
+    };
+    bento.addEventListener('click', function (e) { e.stopPropagation(); setBento(panel.hidden); });
+    panel.addEventListener('click', function (e) { if (e.target.closest('a')) setBento(false); });
+    document.addEventListener('click', function (e) { if (!panel.hidden && !e.target.closest('.lab')) setBento(false); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !panel.hidden) { setBento(false); bento.focus(); } });
+    window.addEventListener('resize', function () { if (window.innerWidth >= 960) setBento(false); });
+  }
 })();
