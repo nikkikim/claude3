@@ -111,7 +111,7 @@
   window.addEventListener('load', all);
 })();
 
-/* ".sbh": the mobile version, a horizontal bar fixed to the top that follows the page's own scrolling.
+/* ".sbh": the mobile version, a horizontal bar on the line under the header that follows the page's own scrolling.
    left cap = top, ← = page back, ◆ = how far you have read (drag it), → = page forward, right cap = bottom. */
 (function () {
   if (!window.matchMedia || !document.body) return;
@@ -131,7 +131,8 @@
   track.innerHTML = '<svg class="dia" viewBox="0 0 8 8"><path d="M4 0 8 4 4 8 0 4z"/></svg>';
   var dia = track.firstChild;
   [capL, back, track, fwd, capR].forEach(function (n) { bar.appendChild(n); });
-  document.body.appendChild(bar);
+  var host = document.querySelector('.col.left > .lab') || document.body;
+  host.appendChild(bar);
 
   function max() { return Math.max(0, document.documentElement.scrollHeight - window.innerHeight); }
   var queued = false;
@@ -139,7 +140,6 @@
     queued = false;
     var m = max(), on = mq.matches && m > 4;
     bar.classList.toggle('on', on);
-    root.classList.toggle('sbh-on', on);
     if (!on) return;
     var span = Math.max(0, track.clientWidth - DIA), ratio = Math.min(1, Math.max(0, window.pageYOffset / m));
     dia.style.transform = 'translateX(' + Math.round(ratio * span) + 'px)';

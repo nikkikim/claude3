@@ -34,15 +34,13 @@
   html[data-theme="dark"] .sb:hover .dia{stroke:#4a78b4}
 }
 
-/* Mobile: the same retro bar, laid out horizontally along the top edge, showing how far down the page you are.
-   Remove the ".sbh" part of scrollbar.js together with this block to drop it. */
+/* Mobile: the same retro bar, laid out horizontally on the line under the name / menu header, showing how far down
+   the page you are. Remove the ".sbh" part of scrollbar.js together with this block to drop it. */
 .sbh{display:none}
 @media (max-width:959px){
-  html.sbh-on body{padding-top:13px}
-  html.sbh-on .col.left>.lab{top:13px}
   .sbh.on{display:flex}
   .sbh{--sb-line:#dedede;--sb-ink:#b0b0b0;
-       position:fixed;left:0;right:0;top:0;height:13px;z-index:40;flex-direction:row;background:#fff;border:1px solid var(--sb-line);
+       position:absolute;left:0;right:0;bottom:-7px;height:13px;z-index:5;flex-direction:row;background:#fff;border:1px solid var(--sb-line);
        -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
   .sbh>*{flex:none;display:flex;align-items:center;justify-content:center;height:100%;padding:0;border:0;border-right:1px solid var(--sb-line);
          background:#fff;color:var(--sb-ink);font:inherit}
@@ -52,7 +50,7 @@
   .sbh .box svg{width:9px;height:7px;fill:none;stroke:currentColor;stroke-width:1;shape-rendering:crispEdges;pointer-events:none}
   .sbh .box:active,.sbh .cap:active{background:#cfe0f7}
   .sbh .track{flex:1 1 auto;position:relative;display:block;min-width:30px;touch-action:none}
-  .sbh .track::before{content:"";position:absolute;left:0;right:0;top:-2px;bottom:-14px}   /* easier to hit with a finger */
+  .sbh .track::before{content:"";position:absolute;left:0;right:0;top:-8px;bottom:-8px}   /* easier to hit with a finger */
   .sbh .dia{position:absolute;top:1px;left:0;width:8px;height:8px;pointer-events:none;fill:var(--sb-ink)}
   .sbh.drag .dia{fill:var(--hl);stroke:#b6d2f4;stroke-width:.8}
 

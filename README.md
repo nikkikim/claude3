@@ -95,5 +95,5 @@ Wix 요금제를 해지하기 전에 이 사이트가 정상으로 열리는지 
   - 관리 화면 안에서 보려면 GoatCounter → Settings → API에서 "Read statistics" 권한 토큰을 만들어 붙여넣어요. 토큰은 관리 비밀번호로 암호화해서 이 브라우저에만 저장돼요. (연결이 안 되면 "대시보드 열기"로 GoatCounter에서 직접 보세요.)
   - GoatCounter → Settings → Timezone을 Asia/Seoul로 맞추면 시간대별 방문이 한국 시간으로 나와요.
   - "이 기기의 내 방문은 집계하지 않기"로 내 방문을 뺄 수 있어요(브라우저마다 따로).
-- **모바일 읽기 표시줄**: 폭 960px 미만에서는 레트로 스크롤바가 화면 위에 가로로 나타나 읽은 위치를 보여줘요(◆ 끌기, 양 끝 칸은 맨 위/맨 아래, 화살표는 한 화면씩). `assets/js/scrollbar.js`의 `.sbh` 블록과 `assets/css/scrollbar.css`의 `.sbh` 블록을 지우면 사라져요.
+- **모바일 읽기 표시줄**: 폭 960px 미만에서는 레트로 스크롤바가 이름·메뉴 영역 아래 선에 가로로 나타나 읽은 위치를 보여줘요(◆ 끌기, 양 끝 칸은 맨 위/맨 아래, 화살표는 한 화면씩). `assets/js/scrollbar.js`의 `.sbh` 블록과 `assets/css/scrollbar.css`의 `.sbh` 블록을 지우면 사라져요.
 - **모바일 메뉴 버튼**: 폭 960px 미만에서는 이름 옆의 점 9개(도시락) 버튼을 누르면 페이지 어느 위치에서든 메뉴가 펼쳐져요. 메뉴는 "메뉴·페이지" 설정을 그대로 따라가요. 지우려면 `build.py`의 `bento` 버튼·`bento-panel`과 `style.css`/`site.js`의 bento 블록을 지우세요.
