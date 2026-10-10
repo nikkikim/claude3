@@ -380,7 +380,7 @@ def page(*, rel, path, title_en, title_ko, desc, left_extra="", mid, right, curr
   </div>
   <nav class="menu m" aria-label="Main">{menu_html}</nav>
   {left_extra}
-  <div class="clock m"><span class="ct"><span data-clock>--:--:--</span> Seoul</span><span class="tbar" data-daybar role="img" aria-label="Daylight colour at Seoul over 24 hours"><i class="now"></i></span></div>
+  <div class="clock m"><span data-clock>--:--:--</span> Seoul</div>
 </aside>
 <main class="col mid" id="main">
 {mid}
@@ -392,7 +392,6 @@ def page(*, rel, path, title_en, title_ko, desc, left_extra="", mid, right, curr
 <script src="{rel}assets/js/cursor.js" defer></script>
 <script src="{rel}assets/js/scrollbar.js" defer></script>
 <script src="{rel}assets/js/signal.js" defer></script>
-<script src="{rel}assets/js/daybar.js" defer></script>
 {script_tags}{analytics_tag()}</body>
 </html>
 """

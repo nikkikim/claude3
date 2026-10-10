@@ -71,13 +71,7 @@ html[lang="en"] .lang [data-set-lang="en"],html[lang="ko"] .lang [data-set-lang=
 .menu .gap{height:12px}
 .intro{margin-top:26px}
 .intro p{margin-bottom:12px}
-.clock{margin-top:auto;padding-top:28px;color:var(--mute);display:flex;align-items:center;gap:10px}
-.clock .ct{white-space:nowrap}
-/* a 24-hour strip of the daylight colour at Seoul (see daybar.js) */
-.tbar{flex:1 1 auto;min-width:48px;height:12px;position:relative;border:1px solid var(--line);background:#eee;overflow:hidden}
-.tbar .now{position:absolute;top:-1px;bottom:-1px;width:2px;margin-left:-1px;background:var(--fg);box-shadow:0 0 0 1px var(--bg);left:0}
-html[data-theme="dark"] .tbar{filter:brightness(.62) saturate(1.15)}
-html[data-theme="dark"] .tbar .now{background:#fff}
+.clock{margin-top:auto;padding-top:28px;color:var(--mute)}
 .block-title{margin-top:26px}
 
 /* works cards (home) */
@@ -145,7 +139,7 @@ html[data-theme="dark"] .tbar .now{background:#fff}
   .menu,.intro,.winfo,.clock{padding-left:14px;padding-right:14px}
   .menu{flex-direction:row;flex-wrap:wrap;gap:6px 16px;padding-top:12px}
   .menu .gap{display:none}
-  .clock{display:none}                                   /* no clock / daylight strip on mobile */
+  .clock{display:none}                                   /* no clock on mobile */
   .col.left>:nth-last-child(2){padding-bottom:20px;border-bottom:1px solid var(--line)}
   .work .row{grid-template-columns:1fr}
   .cv-row{grid-template-columns:78px 1fr}
