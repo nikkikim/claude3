@@ -51,6 +51,57 @@ def portfolio_href(rel):
 DESC_EN = SITE_INFO["desc_en"]
 DESC_KO = SITE_INFO["desc_ko"]
 
+# ---- search & analytics settings (admin: 검색·홍보 / 방문 통계)
+META_DESC = (SITE_INFO.get("seo_desc_en") or "").strip() or DESC_EN          # text under the title in search results
+SEO_TITLE_EN = (SITE_INFO.get("seo_title_en") or "").strip() or "Dasul Kim — Media artist"
+SEO_TITLE_KO = (SITE_INFO.get("seo_title_ko") or "").strip() or "김다슬 — 미디어 아티스트"
+
+
+def word_list(v):
+    return [w.strip() for w in re.split(r"[,\n]", v or "") if w.strip()]
+
+
+KEYWORDS = word_list(SITE_INFO.get("keywords_en")) + word_list(SITE_INFO.get("keywords_ko"))
+SAME_AS = [u for u in word_list(SITE_INFO.get("same_as")) if re.match(r"^https?://", u)]
+if INSTAGRAM and INSTAGRAM not in SAME_AS:
+    SAME_AS.insert(0, INSTAGRAM)
+
+
+def token(v):
+    return re.sub(r"[^A-Za-z0-9_.\-]", "", (v or "").strip())
+
+
+def seo_head(home):
+    out = []
+    if KEYWORDS:
+        out.append(f'<meta name="keywords" content="{esc(", ".join(KEYWORDS), quote=True)}">')
+    out.append(f'<meta name="author" content="{NAME_EN} / {NAME_KO}">')
+    for key, name in (("google_verify", "google-site-verification"), ("naver_verify", "naver-site-verification"),
+                      ("bing_verify", "msvalidate.01")):
+        t = token(SITE_INFO.get(key))
+        if t:
+            out.append(f'<meta name="{name}" content="{t}">')
+    if home:
+        person = {"@type": "Person", "@id": SITE + "/#artist", "name": NAME_EN, "alternateName": [NAME_KO], "url": SITE + "/",
+                  "jobTitle": "Media artist",
+                  "description": [{"@language": "en", "@value": DESC_EN}, {"@language": "ko", "@value": DESC_KO}]}
+        if SAME_AS:
+            person["sameAs"] = SAME_AS
+        if KEYWORDS:
+            person["knowsAbout"] = KEYWORDS
+        site = {"@type": "WebSite", "@id": SITE + "/#website", "url": SITE + "/", "name": f"{NAME_EN} ({NAME_KO})",
+                "inLanguage": ["en", "ko"], "about": {"@id": SITE + "/#artist"}}
+        data = json.dumps({"@context": "https://schema.org", "@graph": [person, site]}, ensure_ascii=False).replace("<", "\\u003c")
+        out.append(f'<script type="application/ld+json">{data}</script>')
+    return "\n".join(out) + "\n"
+
+
+def analytics_tag():
+    code = re.sub(r"[^a-z0-9-]", "", (SITE_INFO.get("goatcounter") or "").strip().lower())
+    if not code:
+        return ""
+    return (f'<script data-goatcounter="https://{code}.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>\n')
+
 # ---------------------------------------------------------------- helpers
 
 
@@ -285,7 +336,7 @@ def page(*, rel, path, title_en, title_ko, desc, left_extra="", mid, right, curr
     card = "summary_large_image" if (og_image or site_og) else "summary"
     og = og + "\n" if og else ""
     robots = '<meta name="robots" content="noindex">\n' if noindex else ""
-    extra_head = extra_head + "\n" if extra_head else ""
+    extra_head = seo_head(path == "") + (extra_head + "\n" if extra_head else "")
     script_tags = "".join(f'<script src="{rel}assets/js/{n}" defer></script>\n' for n in scripts)
     canon = canonical or (SITE + "/" + path)
     return f"""<!doctype html>
@@ -303,8 +354,7 @@ def page(*, rel, path, title_en, title_ko, desc, left_extra="", mid, right, curr
 <meta property="og:type" content="website">
 <meta property="og:url" content="{canon}">
 {og}<meta name="twitter:card" content="{card}">
-{robots}{extra_head}
-<meta name="color-scheme" content="light dark">
+{robots}{extra_head}<meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#ffffff">
 <script>(function(){{var t='light';try{{if(localStorage.getItem('theme')==='dark')t='dark';}}catch(e){{}}document.documentElement.dataset.theme=t;var m=document.querySelector('meta[name="theme-color"]');if(m)m.content=t==='dark'?'#111111':'#ffffff';}})();</script>
 {icon_links(rel)}
@@ -339,7 +389,7 @@ def page(*, rel, path, title_en, title_ko, desc, left_extra="", mid, right, curr
 <script src="{rel}assets/js/cursor.js" defer></script>
 <script src="{rel}assets/js/scrollbar.js" defer></script>
 <script src="{rel}assets/js/mobile-fx.js" defer></script>
-{script_tags}</body>
+{script_tags}{analytics_tag()}</body>
 </html>
 """
 
@@ -374,8 +424,8 @@ def build_home():
                 f'<div class="cv-more m"><a class="u" href="cv/">{L("Full CV →", "이력 전체 →")}</a>{portfolio_link("")}</div>')
     right = right_col(cv_inner, PAGE["cv"]["title_en"], PAGE["cv"]["title_ko"], extra=f'<a class="u" href="cv/">{L("Full", "전체")}</a>')
     write("index.html", page(
-        rel="", path="", title_en="Dasul Kim — Media artist", title_ko="김다슬 — 미디어 아티스트",
-        desc=DESC_EN, left_extra=intro, mid=mid, right=right))
+        rel="", path="", title_en=SEO_TITLE_EN, title_ko=SEO_TITLE_KO,
+        desc=META_DESC, left_extra=intro, mid=mid, right=right))
 
 
 # ---------------------------------------------------------------- work pages
@@ -443,7 +493,7 @@ def build_bio():
            f'<p class="m"><a class="u" href="{rel}cv/">CV →</a> &nbsp; <a class="u" href="mailto:{EMAIL}">{EMAIL}</a></p></div>')
     write("bio/index.html", page(rel=rel, path="bio/", title_en=f"{PAGE['bio']['title_en']} — {NAME_EN}",
                                  title_ko=f"{PAGE['bio']['title_ko']} — {NAME_KO}",
-                                 desc=DESC_EN, mid=mid, right=side_index(rel, None), current="bio"))
+                                 desc=META_DESC, mid=mid, right=side_index(rel, None), current="bio"))
 
 
 def build_statement():
@@ -453,7 +503,7 @@ def build_statement():
            f'<div data-l="ko" lang="ko">{paras(STATEMENT["ko"], "ko")}</div></div>')
     write("statement/index.html", page(rel=rel, path="statement/",
                                        title_en=f"{PAGE['statement']['title_en']} — {NAME_EN}",
-                                       title_ko=f"{PAGE['statement']['title_ko']} — {NAME_KO}", desc=DESC_EN, mid=mid,
+                                       title_ko=f"{PAGE['statement']['title_ko']} — {NAME_KO}", desc=META_DESC, mid=mid,
                                        right=side_index(rel, None), current="statement"))
 
 
@@ -463,7 +513,7 @@ def build_cv():
            + bilingual_cv())
     write("cv/index.html", page(rel=rel, path="cv/", title_en=f"{PAGE['cv']['title_en']} — {NAME_EN}",
                                 title_ko=f"{PAGE['cv']['title_ko']} — {NAME_KO}",
-                                desc=DESC_EN, mid=mid, right=side_index(rel, None), current="cv"))
+                                desc=META_DESC, mid=mid, right=side_index(rel, None), current="cv"))
 
 
 def essay_en(e):
@@ -539,14 +589,14 @@ def build_custom_pages():
 <div class="lock-out"></div>
 <noscript><p class="m">JavaScript is required.</p></noscript>
 </div>"""
-            desc = DESC_EN
+            desc = META_DESC
         else:
             body_en = p.get("body_en", "")
             body_ko = p.get("body_ko") or body_en
             body = (f'<div class="prose"><div data-l="en" lang="en">{md(body_en)}</div>'
                     f'<div data-l="ko" lang="ko">{md(body_ko)}</div></div>')
             first = re.sub(r"\s+", " ", re.sub(r"[#\[\]()]", "", body_en)).strip()
-            desc = (first[:157] + "…") if len(first) > 158 else (first or DESC_EN)
+            desc = (first[:157] + "…") if len(first) > 158 else (first or META_DESC)
         mid = f'<div class="lab"><span class="m">{L(en, ko)}</span></div>' + body
         write(f"{p['slug']}/index.html", page(
             rel=rel, path=f"{p['slug']}/", title_en=f"{p['title_en']} — {NAME_EN}", title_ko=f"{p['title_ko']} — {NAME_KO}",
@@ -560,7 +610,7 @@ def build_404():
     mid = (f'<div class="lab"><span class="m">404</span></div><div class="prose"><p class="lead">{L("Page not found.", "페이지를 찾을 수 없습니다.")}</p>'
            f'<p class="m"><a class="u" href="/">{L("Back to home", "홈으로")}</a></p></div>')
     write("404.html", page(rel=rel, path="404.html", title_en="Not found — Dasul Kim", title_ko="페이지 없음 — 김다슬",
-                           desc=DESC_EN, mid=mid, right='<aside class="col right idx-only"></aside>'))
+                           desc=META_DESC, mid=mid, right='<aside class="col right idx-only"></aside>'))
 
 
 def build_meta():

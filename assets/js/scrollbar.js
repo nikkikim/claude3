@@ -110,3 +110,67 @@
   if (mq.addEventListener) mq.addEventListener('change', all);
   window.addEventListener('load', all);
 })();
+
+/* ".sbh": the mobile version, a horizontal bar fixed to the top that follows the page's own scrolling.
+   left cap = top, ← = page back, ◆ = how far you have read (drag it), → = page forward, right cap = bottom. */
+(function () {
+  if (!window.matchMedia || !document.body) return;
+  var mq = window.matchMedia('(max-width: 959px)'), root = document.documentElement;
+  var DIA = 8;
+  function btn(cls, label, html) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = cls; b.tabIndex = -1; b.setAttribute('aria-label', label);
+    if (html) b.innerHTML = html;
+    return b;
+  }
+  var bar = document.createElement('div'); bar.className = 'sbh'; bar.setAttribute('aria-hidden', 'true');
+  var left = '<svg viewBox="0 0 9 7"><path d="M8 3.5H2M4 1 1.5 3.5 4 6"/></svg>';
+  var right = '<svg viewBox="0 0 9 7"><path d="M1 3.5h6M5 1l2.5 2.5L5 6"/></svg>';
+  var capL = btn('cap', 'top'), back = btn('box', 'page back', left), capR = btn('cap', 'bottom'), fwd = btn('box', 'page forward', right);
+  var track = document.createElement('div'); track.className = 'track';
+  track.innerHTML = '<svg class="dia" viewBox="0 0 8 8"><path d="M4 0 8 4 4 8 0 4z"/></svg>';
+  var dia = track.firstChild;
+  [capL, back, track, fwd, capR].forEach(function (n) { bar.appendChild(n); });
+  document.body.appendChild(bar);
+
+  function max() { return Math.max(0, document.documentElement.scrollHeight - window.innerHeight); }
+  var queued = false;
+  function update() {
+    queued = false;
+    var m = max(), on = mq.matches && m > 4;
+    bar.classList.toggle('on', on);
+    root.classList.toggle('sbh-on', on);
+    if (!on) return;
+    var span = Math.max(0, track.clientWidth - DIA), ratio = Math.min(1, Math.max(0, window.pageYOffset / m));
+    dia.style.transform = 'translateX(' + Math.round(ratio * span) + 'px)';
+  }
+  function schedule() { if (!queued) { queued = true; requestAnimationFrame(update); } }
+  function to(y, smooth) { window.scrollTo({ top: y, behavior: smooth ? 'smooth' : 'instant' }); }
+
+  capL.addEventListener('click', function () { to(0, true); });
+  capR.addEventListener('click', function () { to(max(), true); });
+  back.addEventListener('click', function () { to(window.pageYOffset - window.innerHeight * 0.85, true); });
+  fwd.addEventListener('click', function () { to(window.pageYOffset + window.innerHeight * 0.85, true); });
+
+  var dragging = false;
+  function seek(e) {
+    var r = track.getBoundingClientRect(), span = Math.max(1, r.width - DIA);
+    to(Math.min(1, Math.max(0, (e.clientX - r.left - DIA / 2) / span)) * max(), false);
+  }
+  track.addEventListener('pointerdown', function (e) {
+    if (e.button) return;
+    e.preventDefault(); dragging = true; bar.classList.add('drag'); track.setPointerCapture(e.pointerId); seek(e);
+  });
+  track.addEventListener('pointermove', function (e) { if (dragging) seek(e); });
+  function end() { dragging = false; bar.classList.remove('drag'); }
+  track.addEventListener('pointerup', end); track.addEventListener('pointercancel', end);
+
+  window.addEventListener('scroll', schedule, { passive: true });
+  window.addEventListener('resize', schedule);
+  window.addEventListener('load', schedule);
+  document.addEventListener('load', schedule, true);
+  if (mq.addEventListener) mq.addEventListener('change', schedule);
+  if (window.ResizeObserver) new ResizeObserver(schedule).observe(document.body);
+  schedule();
+})();
+

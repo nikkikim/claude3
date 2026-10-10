@@ -75,13 +75,13 @@
   function getVault() { try { return JSON.parse(localStorage.getItem(VAULT)); } catch (e) { return null; } }
 
   // ---------------------------------------------------------------- state
-  var cfg = null, token = null;
+  var cfg = null, token = null, sessionPw = null;
   var S = {
     phase: 'boot', view: 'works', sel: null, psel: null, cvLang: 'en', busy: false,
     content: null, origSer: null, deletedWorks: [], build: null, media: null
   };
   var KEYS = ['works', 'site', 'pages', 'bio', 'statement', 'cv', 'texts'];
-  var VIEWS = [['works', '작품'], ['pages', '메뉴·페이지'], ['media', '파비콘·미리보기'], ['site', '사이트 정보'], ['bio', '소개 Bio'], ['statement', '작가노트'], ['cv', '이력 CV'], ['texts', '글 Texts']];
+  var VIEWS = [['works', '작품'], ['pages', '메뉴·페이지'], ['media', '파비콘·미리보기'], ['seo', '검색·홍보'], ['stats', '방문 통계'], ['site', '사이트 정보'], ['bio', '소개 Bio'], ['statement', '작가노트'], ['cv', '이력 CV'], ['texts', '글 Texts']];
   var RESERVED = ['bio', 'statement', 'works', 'cv', 'texts', 'contact', 'admin', 'assets', 'content', 'index', '404', 'sitemap', 'robots', 'favicon', 'cname', 'node_modules'];
   var FAV_FILES = ['assets/favicon.ico', 'assets/favicon-32.png', 'assets/favicon-192.png', 'assets/apple-touch-icon.png'];
   var OG_FILE = 'assets/og.jpg';
@@ -661,6 +661,246 @@
     return h('div', null, h('h2', null, '파비콘·미리보기'), h('p', { class: 'lead' }, '브라우저 탭 아이콘과, 주소를 공유했을 때 나오는 미리보기 이미지를 관리해요.'), favCard, ogCard, urlCard);
   }
 
+  // ---------------------------------------------------------------- search & promotion
+  var SUGGEST_EN = ['media artist', 'new media art', 'Korean artist', 'generative art', 'AI art', 'augmented reality', 'interactive art', 'video art', 'art game', 'digital art'];
+  var SUGGEST_KO = ['미디어 아티스트', '미디어아트', '뉴미디어', '인공지능 예술', '증강현실', '제너러티브 아트', '인터랙티브 아트', '영상 작가', '아트게임', '현대미술'];
+
+  function copyText(t) {
+    var done = function () { toast('복사했어요.'); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, function () { window.prompt('복사해서 쓰세요', t); });
+    else window.prompt('복사해서 쓰세요', t);
+  }
+  function siteBase() { return ((S.content.site.site_url || '').trim() || 'https://www.dasulkim.com').replace(/\/+$/, ''); }
+  function card(title, hint) { return h('div', { class: 'card' }, h('b', null, title), hint ? h('p', { class: 'hint', style: 'margin:4px 0 12px' }, hint) : null); }
+  function addWord(s, key, w) {
+    var cur = String(s[key] || '').split(/[,\n]/).map(function (x) { return x.trim(); }).filter(Boolean);
+    if (cur.indexOf(w) < 0) cur.push(w);
+    s[key] = cur.join(', '); renderPanel(); touch();
+  }
+
+  function snippet(s) {
+    var t = (s.seo_title_en || '').trim() || 'Dasul Kim — Media artist', d = (s.seo_desc_en || '').trim() || s.desc_en || '';
+    return h('div', { class: 'snip' }, h('div', { class: 'u' }, siteBase().replace(/^https?:\/\//, '') + ' ›'), h('div', { class: 't' }, t),
+      h('div', { class: 'd' }, d.length > 160 ? d.slice(0, 157) + '…' : d));
+  }
+
+  function viewSeo() {
+    var s = S.content.site, base = siteBase();
+    var c1 = card('검색 결과에 보이는 문구', '구글·네이버 같은 검색 결과에 나오는 제목과 설명이에요. 비워두면 기본 문구를 써요.');
+    var prev = h('div', { id: 'snipbox' }, snippet(s));
+    var reprev = function () { var b = $('#snipbox'); if (b) b.replaceChildren(snippet(s)); };
+    c1.append(
+      h('div', { class: 'row2' },
+        field('제목 (영어)', textInput(s, 'seo_title_en', { ph: 'Dasul Kim — Media artist', after: reprev }), '홈페이지의 검색 제목이에요.'),
+        field('제목 (한국어)', textInput(s, 'seo_title_ko', { ph: '김다슬 — 미디어 아티스트' }), '한국어 화면의 탭 제목에 써요.')),
+      field('설명 (영어)', areaInput(function () { return s.seo_desc_en || ''; }, function (v) { s.seo_desc_en = v; reprev(); }, 3),
+        '120~160자 정도가 좋아요. 비워두면 "사이트 정보"의 홈 소개(영어)를 써요.'), prev);
+    var c2 = card('검색 키워드', '쉼표로 나눠서 적어요. 쓰고 싶은 단어는 아래 제안을 눌러 추가할 수 있어요. 구글은 키워드 태그를 순위에 직접 쓰지 않아서, 이 키워드는 검색엔진용 프로필 정보와 메타 태그에 들어가고 실제 효과는 제목·설명·본문에 같은 단어가 자연스럽게 있을 때 커져요. 단어는 5~12개 정도로 정직하게 고르세요.');
+    c2.append(
+      field('키워드 (영어)', textInput(s, 'keywords_en', { ph: 'media artist, generative art, …' })),
+      h('div', { class: 'chips' }, SUGGEST_EN.map(function (w) { return h('button', { class: 'chip', onclick: function () { addWord(s, 'keywords_en', w); } }, '+ ' + w); })),
+      field('키워드 (한국어)', textInput(s, 'keywords_ko', { ph: '미디어 아티스트, 미디어아트, …' })),
+      h('div', { class: 'chips' }, SUGGEST_KO.map(function (w) { return h('button', { class: 'chip', onclick: function () { addWord(s, 'keywords_ko', w); } }, '+ ' + w); })));
+    var c3 = card('프로필 연결', '내 작업을 보여주는 다른 페이지(인스타그램은 자동 포함)를 한 줄에 하나씩 적으면, 검색엔진이 이 사이트와 같은 사람의 페이지로 묶어 이해하는 데 도움이 돼요. 예: Vimeo, 전시 기관의 작가 소개 페이지, Artsy 등.');
+    c3.append(field('다른 주소 (한 줄에 하나)', areaInput(function () { return s.same_as || ''; }, function (v) { s.same_as = v; }, 3)));
+    var c4 = card('검색엔진에 등록하기', '사이트를 만들어도 검색엔진이 바로 알지는 못해요. 아래 서비스에 한 번씩 등록하면 훨씬 빨리 검색에 나와요. 각 서비스가 알려주는 "인증 코드"를 아래에 붙여넣고 게시하면 소유자 확인이 돼요.');
+    c4.append(
+      h('p', { class: 'hint' }, '1) 등록 → 2) HTML 태그 방식 선택 → 3) content="…" 안의 코드만 아래에 붙여넣기 → 4) 게시하기 → 5) 서비스에서 "확인" → 6) 사이트맵 주소 제출'),
+      h('div', { class: 'row2' },
+        field('구글 인증 코드', textInput(s, 'google_verify', { ph: 'google-site-verification 값' })),
+        field('네이버 인증 코드', textInput(s, 'naver_verify', { ph: 'naver-site-verification 값' }))),
+      h('div', { class: 'row2' }, field('빙(Bing) 인증 코드', textInput(s, 'bing_verify', { ph: 'msvalidate.01 값' })), h('span')),
+      h('div', { class: 'ctl2' },
+        h('a', { class: 'btn small', href: 'https://search.google.com/search-console', target: '_blank', rel: 'noopener' }, 'Google Search Console ↗'),
+        h('a', { class: 'btn small', href: 'https://searchadvisor.naver.com', target: '_blank', rel: 'noopener' }, '네이버 서치어드바이저 ↗'),
+        h('a', { class: 'btn small', href: 'https://www.bing.com/webmasters', target: '_blank', rel: 'noopener' }, 'Bing 웹마스터 ↗')),
+      h('div', { class: 'inline', style: 'margin-top:12px;max-width:none' }, h('input', { type: 'text', readonly: true, value: base + '/sitemap.xml' }),
+        h('button', { class: 'btn small', onclick: function () { copyText(base + '/sitemap.xml'); } }, '사이트맵 주소 복사')));
+    return h('div', null, h('h2', null, '검색·홍보'), h('p', { class: 'lead' }, '검색에 잘 걸리고, 공유할 때 눈에 띄도록 도와주는 설정이에요.'),
+      c1, c2, c3, c4, utmCard(), tipsCard());
+  }
+
+  function utmCard() {
+    var base = siteBase(), st = { dest: '/', source: 'instagram', custom: '', medium: 'social', campaign: '' };
+    var dests = [['/', '홈']];
+    S.content.pages.forEach(function (p) {
+      if (p.status === 'draft') return;
+      if (p.id === 'works') return;
+      dests.push([pageUrl(p), p.title_en + ' (페이지)']);
+    });
+    S.content.works.forEach(function (w) { if (!w._new && w.slug) dests.push(['/works/' + w.slug + '/', w.title_en + ' (작품)']); });
+    var out = h('input', { type: 'text', readonly: true });
+    function build() {
+      var src = st.source === 'other' ? (st.custom.trim() || 'other') : st.source;
+      var q = ['utm_source=' + encodeURIComponent(src), 'utm_medium=' + encodeURIComponent(st.medium)];
+      if (st.campaign.trim()) q.push('utm_campaign=' + encodeURIComponent(st.campaign.trim()));
+      out.value = base + st.dest + '?' + q.join('&');
+    }
+    var sel = function (opts, key, after) {
+      return h('select', { onchange: function (e) { st[key] = e.target.value; if (after) after(); build(); } },
+        opts.map(function (o) { return h('option', { value: o[0], selected: o[0] === st[key] }, o[1]); }));
+    };
+    var customIn = h('input', { type: 'text', placeholder: '예: kakao', style: 'display:none', oninput: function (e) { st.custom = e.target.value; build(); } });
+    var c = card('홍보 링크 만들기', '같은 주소라도 "어디에 올린 링크인지"를 꼬리표로 붙여두면, 방문 통계에서 어느 홍보가 효과 있었는지 구분돼요. 인스타그램 프로필·소개글, 뉴스레터, 전시 안내 메일마다 다른 링크를 만들어 쓰세요.');
+    c.append(
+      h('div', { class: 'row2' }, field('어느 페이지로 연결할까요', sel(dests, 'dest')),
+        field('어디에 올리나요', sel([['instagram', '인스타그램'], ['kakao', '카카오톡'], ['x', 'X(트위터)'], ['facebook', '페이스북'], ['newsletter', '뉴스레터'], ['email', '이메일'], ['blog', '블로그'], ['other', '직접 입력']], 'source', function () { customIn.style.display = st.source === 'other' ? '' : 'none'; }))),
+      customIn,
+      h('div', { class: 'row2' }, field('방식', sel([['social', 'SNS'], ['message', '메신저'], ['email', '이메일'], ['qr', 'QR·인쇄물'], ['referral', '다른 사이트']], 'medium')),
+        field('캠페인 이름 (선택)', h('input', { type: 'text', placeholder: '예: solo-show-2026', oninput: function (e) { st.campaign = e.target.value; build(); } }))),
+      h('div', { class: 'inline', style: 'max-width:none' }, out, h('button', { class: 'btn small', onclick: function () { copyText(out.value); } }, '복사')));
+    build();
+    return c;
+  }
+
+  function tipsCard() {
+    var tips = [
+      ['이름 표기를 통일하세요', '"김다슬"과 "Dasul Kim"을 사이트·인스타그램·전시 소개·보도자료에 똑같이 쓰면 검색엔진이 같은 사람으로 이해해요.'],
+      ['다른 곳에서 이 사이트로 링크를 받으세요', '참여한 전시·기관·갤러리의 작가 소개 페이지, 인터뷰 기사, 학교·레지던시 페이지에서 이 주소로 링크를 걸어달라고 부탁하세요. 검색 순위에 가장 큰 영향을 주는 것 중 하나예요.'],
+      ['인스타그램 프로필 링크를 연결하세요', '프로필의 링크를 이 사이트로 두고, 위의 "홍보 링크"로 꼬리표를 붙이면 인스타그램에서 온 방문이 따로 집계돼요.'],
+      ['이메일 서명·명함·포트폴리오 PDF에 주소를 넣으세요', '전시 지원서나 메일마다 주소(와 QR)를 넣어두면 꾸준히 방문이 생겨요. 인쇄물에는 "QR·인쇄물" 꼬리표 링크를 쓰세요.'],
+      ['작품 설명을 충실하게 쓰세요', '검색엔진은 글을 읽어요. 작품 제목·연도·매체·전시 이력이 글로 적혀 있을수록 잘 걸려요. 사진만 있는 페이지는 거의 검색에 나오지 않아요.'],
+      ['보도자료용 페이지를 만들어두세요', '"메뉴·페이지"에서 Press 페이지를 만들어 약력·작가노트·대표 이미지 사용 안내를 적어두면 기자·큐레이터가 찾기 쉬워요. 메뉴에 넣고 싶지 않다면 "공개하되 메뉴에는 넣지 않기"로 두고 링크만 보내세요.'],
+      ['공유 미리보기 이미지를 올리세요', '"파비콘·미리보기"에서 대표 이미지를 올리면 링크를 보낼 때 클릭률이 올라가요.'],
+      ['검색엔진에 등록하세요', '위의 구글·네이버·빙 등록은 한 번이면 돼요. 한국에서는 네이버 등록이 특히 중요해요.'],
+      ['(참고) 한국어 검색을 더 키우고 싶다면', '지금은 영어·한국어가 한 주소에서 버튼으로 바뀌는 방식이라, 검색엔진에는 영어 제목·설명이 기본으로 보여요. 한국어 검색이 중요해지면 한국어 전용 주소(/ko/)를 따로 만드는 방법이 있어요. 필요하면 말씀해 주세요.']];
+    var c = card('홍보 아이디어', '비용 없이 바로 할 수 있는 것부터 적었어요.');
+    c.append(h('ol', { class: 'tips' }, tips.map(function (t) { return h('li', null, h('b', null, t[0]), h('span', { class: 'hint' }, t[1])); })));
+    return c;
+  }
+
+  // ---------------------------------------------------------------- visitor statistics (GoatCounter)
+  var GCKEY = 'dk_admin_gc';
+  var GC = { token: null, tokenLoaded: false, range: 30, data: null, loading: false, err: '' };
+  function gcCode() { return String(S.content.site.goatcounter || '').trim().toLowerCase().replace(/[^a-z0-9-]/g, ''); }
+
+  async function gcLoadToken() {
+    if (GC.tokenLoaded) return;
+    GC.tokenLoaded = true;
+    try {
+      var v = JSON.parse(localStorage.getItem(GCKEY) || 'null');
+      if (v && sessionPw) GC.token = await unseal(v, sessionPw);
+    } catch (e) { GC.token = null; }
+  }
+  async function gcGet(path, params) {
+    var q = Object.keys(params || {}).map(function (k) { return k + '=' + encodeURIComponent(params[k]); }).join('&');
+    var r = await fetch('https://' + gcCode() + '.goatcounter.com/api/v0' + path + (q ? '?' + q : ''),
+      { headers: { 'Authorization': 'Bearer ' + GC.token, 'Accept': 'application/json' } });
+    if (!r.ok) { var e = new Error('HTTP ' + r.status); e.status = r.status; throw e; }
+    return r.json();
+  }
+  async function gcFetchAll() {
+    GC.loading = true; GC.err = ''; renderPanel();
+    var end = new Date(), start = new Date(Date.now() - GC.range * 86400000); start.setHours(0, 0, 0, 0);
+    var range = { start: start.toISOString(), end: end.toISOString() };
+    function P(extra) { return Object.assign({}, range, extra || {}); }
+    try {
+      var names = ['total', 'hits', 'toprefs', 'locations', 'sizes', 'systems', 'browsers', 'languages', 'campaigns'];
+      var res = await Promise.all([
+        gcGet('/stats/total', P()), gcGet('/stats/hits', P({ limit: 10 })),
+        gcGet('/stats/toprefs', P({ limit: 10 })), gcGet('/stats/locations', P({ limit: 12 })), gcGet('/stats/sizes', P()),
+        gcGet('/stats/systems', P({ limit: 8 })), gcGet('/stats/browsers', P({ limit: 8 })),
+        gcGet('/stats/languages', P({ limit: 8 })), gcGet('/stats/campaigns', P({ limit: 8 }))]);
+      GC.data = {}; names.forEach(function (n, i) { GC.data[n] = res[i]; });
+    } catch (e) {
+      GC.data = null;
+      GC.err = e.status === 401 || e.status === 403 ? '통계 토큰이 맞지 않거나 "통계 읽기" 권한이 없어요. 토큰을 다시 만들어 연결해주세요.'
+        : e.status ? '통계 서버가 오류를 알려왔어요 (' + e.message + ').' : '통계를 불러오지 못했어요. 인터넷 연결이나 광고 차단 프로그램을 확인하거나, 아래 "대시보드 열기"로 직접 보세요.';
+    }
+    GC.loading = false; if (S.view === 'stats') renderPanel();
+  }
+
+  function blist(title, rows, note) {
+    var list = (rows || []).filter(function (r) { return r && r.count > 0; }), max = list.reduce(function (m, r) { return Math.max(m, r.count); }, 0) || 1;
+    return h('div', { class: 'bl' }, h('div', { class: 'm mute' }, title),
+      list.length ? list.map(function (r) {
+        return h('div', { class: 'brow' }, h('span', { class: 'bn', title: r.name || r.path || '' }, r.name || r.path || '(직접 방문)'),
+          h('span', { class: 'bbar' }, h('i', { style: 'width:' + Math.round(r.count / max * 100) + '%' })), h('span', { class: 'bc' }, String(r.count)));
+      }) : h('p', { class: 'hint' }, '아직 데이터가 없어요.'),
+      note ? h('p', { class: 'hint' }, note) : null);
+  }
+
+  function statsBody() {
+    var d = GC.data, days = (d.total.stats || []), hours = new Array(24).fill(0), sumDaily = 0, maxDay = 1;
+    days.forEach(function (x) { sumDaily += x.daily || 0; maxDay = Math.max(maxDay, x.daily || 0); (x.hourly || []).forEach(function (n, i) { if (i < 24) hours[i] += n || 0; }); });
+    var maxH = Math.max.apply(null, hours.concat([1]));
+    var sizes = (d.sizes.stats || []);
+    return h('div', null,
+      h('div', { class: 'kpis' },
+        h('div', null, h('b', null, String(d.total.total || 0)), h('span', { class: 'hint' }, '방문자 (기간 합계)')),
+        h('div', null, h('b', null, String(sumDaily)), h('span', { class: 'hint' }, '일별 방문 합계')),
+        h('div', null, h('b', null, days.length ? (sumDaily / days.length).toFixed(1) : '0'), h('span', { class: 'hint' }, '하루 평균'))),
+      h('div', { class: 'm mute', style: 'margin:14px 0 4px' }, '날짜별 방문'),
+      h('div', { class: 'chart' }, days.map(function (x) { return h('i', { title: x.day + ' · ' + (x.daily || 0) + '명', style: 'height:' + Math.max(2, Math.round((x.daily || 0) / maxDay * 100)) + '%' }); })),
+      h('div', { class: 'm mute', style: 'margin:14px 0 4px' }, '시간대별 방문 (0시~23시)'),
+      h('div', { class: 'chart hours' }, hours.map(function (n, i) { return h('i', { title: i + '시 · ' + n + '명', style: 'height:' + Math.max(2, Math.round(n / maxH * 100)) + '%' }); })),
+      h('p', { class: 'hint' }, '시간은 GoatCounter 사이트 설정의 시간대 기준이에요. (GoatCounter → Settings → Timezone을 Asia/Seoul로 맞추면 한국 시간으로 보여요.)'),
+      h('div', { class: 'grid2' },
+        blist('인기 페이지', (d.hits.hits || []).map(function (x) { return { name: x.path, count: x.count }; })),
+        blist('어디서 왔나요 (접근 경로)', d.toprefs.stats),
+        blist('어느 나라에서 (위치)', d.locations.stats, '국가 단위까지만 알 수 있어요. 개인을 식별하지 않아요.'),
+        blist('기기 (화면 크기)', sizes),
+        blist('운영체제', d.systems.stats),
+        blist('브라우저', d.browsers.stats),
+        blist('언어', d.languages.stats),
+        blist('홍보 링크(캠페인)', d.campaigns.stats, '"검색·홍보"에서 만든 꼬리표 링크로 들어온 방문이에요.')));
+  }
+
+  function viewStats() {
+    var s = S.content.site, code = gcCode();
+    var codeCard = card('방문 통계 연결 (GoatCounter)', 'GoatCounter는 쿠키 없이 방문자 수·위치(국가)·시간·접근 경로·기기를 세어주는 무료 서비스예요(개인·비영리용). 이 사이트에는 계정을 만들 때 정한 이름(코드)만 연결하면 돼요.');
+    codeCard.append.apply(codeCard, [
+      !code ? h('ol', { class: 'tips' },
+        h('li', null, h('a', { class: 'link', href: 'https://www.goatcounter.com/signup', target: '_blank', rel: 'noopener' }, 'goatcounter.com/signup'), '에서 가입해요. "Site code"는 영문 소문자로 정해요. (예: dasulkim → dasulkim.goatcounter.com)'),
+        h('li', null, '아래 칸에 그 코드를 적고 "게시하기"를 눌러요. 그때부터 방문이 집계돼요.'),
+        h('li', null, 'GoatCounter → Settings에서 Timezone을 Asia/Seoul로 바꿔두면 시간이 한국 기준으로 나와요.')) : null,
+      field('GoatCounter 코드', textInput(s, 'goatcounter', { ph: 'dasulkim', after: function () { s.goatcounter = String(s.goatcounter || '').toLowerCase().replace(/[^a-z0-9-]/g, ''); } }),
+        code ? '현재 연결: https://' + code + '.goatcounter.com · 비우고 게시하면 집계를 멈춰요. 바꾼 뒤에는 게시하기를 눌러야 적용돼요.' : '게시하기를 누르면 사이트에 집계 코드가 들어가요.')].filter(Boolean));
+    var body = [h('h2', null, '방문 통계'), h('p', { class: 'lead' }, '방문자의 위치(국가)·시간·접근 경로·기기를 확인해요.'), codeCard];
+    if (!code) return h('div', null, body);
+
+    var skip = false; try { skip = localStorage.getItem('skipgc') === 't'; } catch (e) {}
+    var act = h('div', { class: 'ctl2' },
+      h('a', { class: 'btn small', href: 'https://' + code + '.goatcounter.com', target: '_blank', rel: 'noopener' }, '대시보드 열기 ↗'),
+      h('button', { class: 'btn small', onclick: function () {
+        try { if (skip) localStorage.removeItem('skipgc'); else localStorage.setItem('skipgc', 't'); } catch (e) {}
+        renderPanel();
+      } }, skip ? '이 기기의 내 방문도 집계하기' : '이 기기의 내 방문은 집계하지 않기'));
+    body.push(h('div', { class: 'card' }, h('b', null, '내 방문 제외'), h('p', { class: 'hint', style: 'margin:4px 0 8px' },
+      skip ? '이 브라우저에서의 방문은 집계되지 않아요.' : '내가 사이트를 확인하느라 들어간 방문이 섞이지 않게 할 수 있어요. 기기·브라우저마다 따로 설정해요. (휴대폰에서는 사이트 주소 끝에 #toggle-goatcounter 를 붙여 열면 켜고 끌 수 있어요.)'), act));
+
+    var tokCard = card('통계를 이 화면에서 보기', null);
+    if (!GC.tokenLoaded) { gcLoadToken().then(function () { if (S.view === 'stats') renderPanel(); }); body.push(tokCard, h('p', { class: 'hint' }, '불러오는 중…')); return h('div', null, body); }
+    if (!GC.token) {
+      var tk = h('input', { type: 'password', autocomplete: 'off', placeholder: 'GoatCounter API 토큰' });
+      tokCard.append(
+        h('ol', { class: 'tips' },
+          h('li', null, 'GoatCounter에 로그인 → 오른쪽 위 Settings → "API" 탭 → "Create new token"'),
+          h('li', null, '권한은 "Read statistics"만 체크해요. (쓰기 권한은 필요 없어요.)'),
+          h('li', null, '만들어진 토큰을 아래에 붙여넣어요.')),
+        h('div', { class: 'inline', style: 'max-width:none' }, tk, h('button', { class: 'btn small', onclick: async function () {
+          var t = tk.value.trim(); if (!t) return;
+          if (!sessionPw) { toast('다시 잠금을 풀고 시도해주세요.'); return; }
+          try { localStorage.setItem(GCKEY, JSON.stringify(await seal(t, sessionPw))); } catch (e) { toast('이 브라우저에는 저장할 수 없어요.'); return; }
+          GC.token = t; gcFetchAll();
+        } }, '연결')),
+        h('p', { class: 'hint', style: 'margin-top:8px' }, '토큰은 관리 비밀번호로 암호화해서 이 브라우저에만 저장돼요. 사이트에는 올라가지 않아요.'));
+      body.push(tokCard); return h('div', null, body);
+    }
+    tokCard.append(h('div', { class: 'ctl2' },
+      h('div', { class: 'tabs', style: 'margin:0' }, [[7, '7일'], [30, '30일'], [90, '90일'], [365, '1년']].map(function (r) {
+        return h('button', { class: GC.range === r[0] ? 'on' : '', onclick: function () { GC.range = r[0]; gcFetchAll(); } }, r[1]);
+      })),
+      h('button', { class: 'btn small', onclick: gcFetchAll }, '새로고침'),
+      h('button', { class: 'btn small', onclick: function () { if (confirm('이 브라우저에 저장된 통계 토큰을 지울까요?')) { localStorage.removeItem(GCKEY); GC.token = null; GC.data = null; renderPanel(); } } }, '토큰 지우기')));
+    body.push(tokCard);
+    if (GC.loading) body.push(h('p', { class: 'hint' }, '불러오는 중…'));
+    else if (GC.err) body.push(h('div', { class: 'msg bad', style: 'padding:9px 12px;border:1px solid #f0b7b0;background:#fdf3f2' }, GC.err));
+    else if (GC.data) body.push(statsBody());
+    else { GC.data = null; setTimeout(function () { if (S.view === 'stats' && !GC.data && !GC.loading && !GC.err) gcFetchAll(); }, 0); }
+    return h('div', null, body);
+  }
+
   // ---------------------------------------------------------------- shell
   function renderPanel() {
     var p = $('#panel'); if (!p) return;
@@ -669,6 +909,8 @@
     else if (v === 'site') node = viewSite();
     else if (v === 'pages') node = viewPages();
     else if (v === 'media') node = viewMedia();
+    else if (v === 'seo') node = viewSeo();
+    else if (v === 'stats') node = viewStats();
     else if (v === 'bio') node = viewParas('bio', '소개 Bio', '소개 글이에요.');
     else if (v === 'statement') node = viewParas('statement', '작가노트', '작가노트 글이에요.');
     else if (v === 'cv') node = viewCv();
@@ -741,7 +983,7 @@
 
   function lock() {
     if (isDirty() && !confirm('게시하지 않은 변경 사항이 있어요. 그래도 잠글까요?')) return;
-    token = null; S.content = null; S.phase = 'lock'; S.build = null; renderLock();
+    token = null; sessionPw = null; GC.token = null; GC.tokenLoaded = false; GC.data = null; S.content = null; S.phase = 'lock'; S.build = null; renderLock();
   }
 
   // ---------------------------------------------------------------- publish (one commit)
@@ -932,6 +1174,7 @@
         err.textContent = '';
         var t = await unseal(vault, pw.value);
         if (!t) { err.textContent = '비밀번호가 맞지 않아요.'; return; }
+        sessionPw = pw.value;
         await enter(t, err);
       };
       pw.addEventListener('keydown', function (e) { if (e.key === 'Enter') go(); });
@@ -950,6 +1193,7 @@
         if (!t) { err.textContent = '토큰을 붙여넣어주세요.'; return; }
         if (p1.value.length < 8) { err.textContent = '비밀번호는 8자 이상으로 정해주세요.'; return; }
         if (p1.value !== p2.value) { err.textContent = '비밀번호가 서로 달라요.'; return; }
+        sessionPw = p1.value;
         var ok = await enter(t, err, true);
         if (ok) { try { localStorage.setItem(VAULT, JSON.stringify(await seal(t, p1.value))); } catch (e) { toast('이 브라우저에는 저장할 수 없어요. 이번에만 사용해요.'); } }
       };

@@ -127,6 +127,35 @@ input:focus,textarea:focus,select:focus{border-color:#4b8bdc;outline:0}
 .ogimg{display:block;width:100%;max-width:480px;aspect-ratio:1200/630;object-fit:cover;border:1px solid var(--line);margin-bottom:10px;background:#f4f4f4}
 .ctl2{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
 
+/* search & stats */
+select{font:inherit;font-size:14px;width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:0;background:#fff;color:var(--fg)}
+input[readonly]{background:#fafafa;color:#444}
+.snip{border:1px solid var(--line);padding:10px 12px;max-width:600px;background:#fff;margin-top:4px}
+.snip .u{font-size:12px;color:#188038}
+.snip .t{font-size:18px;color:#1a0dab;line-height:1.3;margin:2px 0}
+.snip .d{font-size:13px;color:#4d5156}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:-6px 0 14px}
+.chip{border:1px solid var(--line);border-radius:30px;padding:1px 10px;font-size:12px;background:#fff}
+.chip:hover{background:var(--hl)}
+.tips{margin-left:18px;display:grid;gap:10px}
+.tips b{display:block}
+.tips .hint{display:block}
+a.btn{text-decoration:none}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.kpis>div{border:1px solid var(--line);padding:10px 14px;background:#fff}
+.kpis b{display:block;font-size:24px;letter-spacing:-.02em}
+.chart{display:flex;align-items:flex-end;gap:2px;height:90px;border-bottom:1px solid var(--line)}
+.chart i{flex:1;min-width:1px;background:#b6d2f4}
+.chart i:hover{background:#4b8bdc}
+.chart.hours{height:60px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px 28px;margin-top:20px}
+.bl .brow{display:grid;grid-template-columns:minmax(0,1.4fr) 1fr 36px;gap:8px;align-items:center;font-size:13px;padding:2px 0}
+.bl .bn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bl .bbar{background:#f0f0f0;height:8px}
+.bl .bbar i{display:block;height:100%;background:#b6d2f4}
+.bl .bc{text-align:right;font-family:var(--mono);font-size:11px;color:var(--mute)}
+@media (max-width:760px){.grid2{grid-template-columns:1fr}.kpis{grid-template-columns:1fr}}
+
 #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--fg);color:#fff;padding:9px 16px;border-radius:30px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50;max-width:90vw}
 #toast.show{opacity:1}
 
