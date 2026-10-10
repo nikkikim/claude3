@@ -416,8 +416,7 @@ def build_home():
 <a class="cover" href="{href}" aria-label="{t_en}"><img src="assets/works/{w['slug']}/cover.jpg" width="{cw}" height="{ch}" alt="{esc(w['title_en'])}" loading="{'eager' if w['n'] <= 2 else 'lazy'}" decoding="async"></a>
 <div class="row"><div class="t">{w['n']:02d}. <a href="{href}">{L(t_en, t_ko)}</a></div><div class="d"><i>{meta}</i></div></div>
 </article>""")
-    mid = (f'<div class="lab"><span class="m" id="works">{L(*T("works"))} <span class="pill">{len(WORKS)}</span></span>'
-           f'<span class="m mute">{WORKS[-1]["year"]}–{WORKS[0]["year"]}</span></div>' + "".join(cards))
+    mid = (f'<div class="lab"><span class="m" id="works">{L(*T("works"))} <span class="pill">{len(WORKS)}</span></span></div>' + "".join(cards))
     intro = f"""<div class="intro">
   <div data-l="en" lang="en"><p>{esc(DESC_EN)}</p></div>
   <div data-l="ko" lang="ko"><p>{esc(DESC_KO)}</p></div>

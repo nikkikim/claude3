@@ -137,7 +137,8 @@ html[lang="en"] .lang [data-set-lang="en"],html[lang="ko"] .lang [data-set-lang=
   .lab{height:auto;min-height:52px;padding-bottom:12px;margin:0;padding-left:14px;padding-right:14px;border-bottom:1px solid var(--line)}
   .col.mid>.lab,.col.right>.lab{position:static;height:48px;margin:0 -14px}
   .menu,.intro,.winfo,.clock{padding-left:14px;padding-right:14px}
-  .menu{flex-direction:row;flex-wrap:wrap;gap:6px 16px;padding-top:12px}
+  .menu{flex-direction:row;flex-wrap:wrap;gap:6px 16px;padding-top:12px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+  .col.left>.lab{border-top:1px solid var(--line)}
   .menu .gap{display:none}
   .clock{display:none}                                   /* no clock on mobile */
   .col.left>:nth-last-child(2){padding-bottom:20px;border-bottom:1px solid var(--line)}
