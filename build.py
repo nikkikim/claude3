@@ -489,7 +489,7 @@ def side_index(rel, current):
 
 def build_bio():
     rel = "../"
-    mid = (f'<div class="lab"><span class="m">{L(*T("bio"))}</span><span class="m mute">{L(NAME_EN, NAME_KO)}</span></div>'
+    mid = (f'<div class="lab"><span class="m">{L(*T("bio"))}</span></div>'
            f'<div class="prose"><div data-l="en" lang="en">{paras(BIO["en"], "en")}</div>'
            f'<div data-l="ko" lang="ko">{paras(BIO["ko"], "ko")}</div>'
            f'<p class="m"><a class="u" href="{rel}cv/">CV →</a> &nbsp; <a class="u" href="mailto:{EMAIL}">{EMAIL}</a></p></div>')
@@ -500,7 +500,7 @@ def build_bio():
 
 def build_statement():
     rel = "../"
-    mid = (f'<div class="lab"><span class="m">{L(*T("statement"))}</span><span class="m mute">{L(NAME_EN, NAME_KO)}</span></div>'
+    mid = (f'<div class="lab"><span class="m">{L(*T("statement"))}</span></div>'
            f'<div class="prose"><div data-l="en" lang="en">{paras(STATEMENT["en"], "en")}</div>'
            f'<div data-l="ko" lang="ko">{paras(STATEMENT["ko"], "ko")}</div></div>')
     write("statement/index.html", page(rel=rel, path="statement/",
