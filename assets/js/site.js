@@ -22,6 +22,23 @@
   });
   setLang(root.lang, false);
 
+  // dark / light
+  function setTheme(t, persist) {
+    t = t === 'dark' ? 'dark' : 'light';
+    root.dataset.theme = t;
+    var m = document.querySelector('meta[name="theme-color"]');
+    if (m) m.content = t === 'dark' ? '#111111' : '#ffffff';
+    var btns = document.querySelectorAll('[data-theme-toggle]');
+    for (var i = 0; i < btns.length; i++) btns[i].setAttribute('aria-pressed', t === 'dark' ? 'true' : 'false');
+    if (persist) { try { localStorage.setItem('theme', t); } catch (e) {} }
+  }
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest && e.target.closest('[data-theme-toggle]');
+    if (!t) return;
+    setTheme(root.dataset.theme === 'dark' ? 'light' : 'dark', true);
+  });
+  setTheme(root.dataset.theme, false);
+
   // Seoul clock
   var clocks = document.querySelectorAll('[data-clock]');
   if (clocks.length && window.Intl) {

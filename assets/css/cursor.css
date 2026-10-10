@@ -14,4 +14,5 @@
   .xh-xy span{position:absolute;left:16px;top:14px;padding:2px 5px 1px;background:rgba(255,255,255,.92);color:#111;border-radius:2px;font:400 10px/1.25 var(--mono);letter-spacing:.02em;white-space:pre;text-transform:uppercase;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
   .xh-xy.flip-x span{left:auto;right:16px;text-align:right}
   .xh-xy.flip-y span{top:auto;bottom:14px}
+  html[data-theme="dark"] .xh-xy span{background:rgba(17,17,17,.92);color:#fff;box-shadow:0 0 0 1px rgba(255,255,255,.16)}
 }

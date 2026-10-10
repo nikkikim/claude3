@@ -69,3 +69,4 @@ Wix 요금제를 해지하기 전에 이 사이트가 정상으로 열리는지 
 - 십자선 커서(마우스 전용)는 `assets/css/cursor.css`와 `assets/js/cursor.js`로 분리돼 있어요. 끄려면 `build.py`에서 이 두 파일을 불러오는 줄(`cursor.css`, `cursor.js`)을 지우고 `python3 build.py`를 다시 실행하세요. 터치 기기에서는 원래도 나타나지 않아요.
 - 레트로 스크롤바(데스크톱 3열 전용)는 `assets/css/scrollbar.css`와 `assets/js/scrollbar.js`로 분리돼 있어요. 끄려면 `build.py`에서 이 두 파일을 불러오는 줄을 지우고 `python3 build.py`를 다시 실행하세요. 모바일에서는 원래 스크롤바를 그대로 써요.
 - **포트폴리오 PDF**는 사이트에 파일을 두지 않고 링크만 연결해요. 관리 페이지의 "사이트 정보 → 포트폴리오 PDF 주소"(또는 `content/site.json`의 `portfolio`)에 PDF의 전체 주소를 넣으면 홈 오른쪽과 이력 페이지의 "Portfolio PDF" 링크가 새 창에서 그 주소를 열어요. 주소를 비우면 링크가 사라져요.
+- 다크/라이트 전환: 왼쪽 위의 해/달 아이콘이에요. 선택은 브라우저에 기억돼요(처음 방문은 항상 라이트). 색은 `assets/css/style.css`의 `html[data-theme="dark"]` 줄에서 바꿔요.

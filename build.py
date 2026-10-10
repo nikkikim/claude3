@@ -171,7 +171,9 @@ def page(*, rel, path, title_en, title_ko, desc, left_extra="", mid, right, curr
 <meta property="og:url" content="{canon}">
 {og}
 <meta name="twitter:card" content="summary_large_image">
-<meta name="color-scheme" content="light">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#ffffff">
+<script>(function(){{var t='light';try{{if(localStorage.getItem('theme')==='dark')t='dark';}}catch(e){{}}document.documentElement.dataset.theme=t;var m=document.querySelector('meta[name="theme-color"]');if(m)m.content=t==='dark'?'#111111':'#ffffff';}})();</script>
 <link rel="icon" href="{rel}assets/favicon.ico" sizes="48x48">
 <link rel="icon" href="{rel}assets/favicon-32.png" type="image/png" sizes="32x32">
 <link rel="icon" href="{rel}assets/favicon-192.png" type="image/png" sizes="192x192">
@@ -187,7 +189,10 @@ def page(*, rel, path, title_en, title_ko, desc, left_extra="", mid, right, curr
 <aside class="col left">
   <div class="lab">
     <a class="name m" href="{rel or './'}">{L(NAME_EN, NAME_KO)}</a>
+    <div class="tools">
     <div class="lang m" role="group" aria-label="Language"><button type="button" data-set-lang="en" aria-pressed="true">EN</button><span class="sep">/</span><button type="button" data-set-lang="ko" aria-pressed="false">KR</button></div>
+    <button type="button" class="theme" data-theme-toggle aria-pressed="false" aria-label="Dark mode" title="Dark / Light"><svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.6A8.2 8.2 0 0 1 9.4 4a8.2 8.2 0 1 0 10.6 10.6z"/></svg><svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5.3 5.3l1.7 1.7M17 17l1.7 1.7M5.3 18.7 7 17M17 7l1.7-1.7"/></svg></button>
+    </div>
   </div>
   <nav class="menu m" aria-label="Main">{menu_html}</nav>
   {left_extra}
@@ -356,8 +361,7 @@ def build_texts():
 def build_contact():
     rel = "../"
     mid = (f'<div class="lab"><span class="m">{L("Contact", "연락")}</span></div>'
-           f'<div class="prose"><p class="lead"><a class="u" href="mailto:{EMAIL}">{EMAIL} ↗</a></p>'
-           f'<p class="lead"><a class="u" href="{INSTAGRAM}" target="_blank" rel="noopener">Instagram ↗</a></p></div>')
+           f'<div class="prose"><p class="lead"><a class="u" href="mailto:{EMAIL}">{EMAIL} ↗</a></p></div>')
     write("contact/index.html", page(rel=rel, path="contact/", title_en="Contact — Dasul Kim",
                                      title_ko="연락 — 김다슬", desc=f"Contact Dasul Kim: {EMAIL}",
                                      mid=mid, right=side_index(rel, None), current="contact"))

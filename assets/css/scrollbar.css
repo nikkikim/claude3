@@ -24,4 +24,12 @@
   .sb .track{flex:1 1 auto;position:relative;display:block;min-height:30px;touch-action:none}
   .sb .dia{position:absolute;left:1px;top:0;width:7px;height:7px;pointer-events:none;fill:var(--sb-ink)}
   .sb:hover .dia{fill:var(--hl);stroke:#b6d2f4;stroke-width:.8}
+
+  html[data-theme="dark"] .sb{--sb-line:#333;--sb-ink:#7c7c7c;background:var(--bg)}
+  html[data-theme="dark"] .sb>*{background:var(--bg)}
+  html[data-theme="dark"] .sb .cap{background:#1d1d1d}
+  html[data-theme="dark"] .sb .cap:hover{background:#2c2c2c}
+  html[data-theme="dark"] .sb .box:hover{color:#fff}
+  html[data-theme="dark"] .sb .box:active,html[data-theme="dark"] .sb .cap:active{background:#2f5a96}
+  html[data-theme="dark"] .sb:hover .dia{stroke:#4a78b4}
 }
