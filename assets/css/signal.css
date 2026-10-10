@@ -1,0 +1,20 @@
+/* "Signal mode" (the eye button): every text on the page turns into signal glyphs; drag over it to read.
+   The real text stays in the page (only made transparent), so layout never moves. Remove this file and signal.js,
+   plus the eye button in build.py, to drop the mode. */
+.sg-layer,.sg-hint{display:none}
+html.sig-on .cols{position:relative;-webkit-user-select:none;user-select:none}
+html.sig-on .col{position:relative}
+html.sig-on .col>:not(.lab):not(.clock):not(.sg-layer){color:transparent!important;--fg:transparent;--mute:transparent}
+html.sig-on .col>:not(.lab):not(.clock):not(.sg-layer) a{text-decoration-color:transparent}
+html.sig-on .col .lockform,html.sig-on .col .lockform *{color:var(--fg0)!important;--fg:var(--fg0)}
+html.sig-on .lockform input{-webkit-user-select:text;user-select:text}
+
+html.sig-on .sg-layer{display:block;position:absolute;left:0;top:0;width:100%;height:0;z-index:1;pointer-events:none}
+.sg-layer i{position:absolute;display:block;white-space:nowrap;overflow:hidden;font-style:normal;text-align:left;
+  color:var(--mute0);font-family:var(--mono);letter-spacing:var(--ls,0)}
+.sg-layer i.o{color:var(--fg0);font-family:var(--ff,inherit);letter-spacing:var(--lr,0)}
+
+html.sig-on .sg-hint{display:block;position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:60;padding:6px 14px;border-radius:30px;
+  background:var(--fg0);color:var(--bg);font:400 11px/1.5 var(--mono);letter-spacing:.02em;text-transform:uppercase;white-space:nowrap;
+  opacity:0;pointer-events:none;transition:opacity .3s}
+html.sig-on .sg-hint.show{opacity:1}

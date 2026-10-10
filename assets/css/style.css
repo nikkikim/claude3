@@ -4,7 +4,7 @@
 @font-face{font-family:"Geist Mono";src:url(../fonts/GeistMono-Medium.woff2) format("woff2");font-weight:500;font-display:swap}
 
 :root{
-  --bg:#fff;--fg:#111;--mute:#8d8d8d;--line:#e3e3e3;--hl:#d9e8fb;--thumb:#f4f4f4;--hover:#f6f9fd;
+  --bg:#fff;--fg:#111;--mute:#8d8d8d;--fg0:#111;--mute0:#8d8d8d;--line:#e3e3e3;--hl:#d9e8fb;--thumb:#f4f4f4;--hover:#f6f9fd;
   --sans:"Pretendard",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
   --mono:"Geist Mono","Pretendard",ui-monospace,SFMono-Regular,Menlo,monospace;
 }
@@ -17,7 +17,7 @@ img,video{display:block;max-width:100%;height:auto}
 ::selection{background:var(--hl)}
 
 /* dark mode: white text, near-black picture mats (light mode is unchanged) */
-html[data-theme="dark"]{--bg:#111;--fg:#fff;--mute:#9a9a9a;--line:#2a2a2a;--hl:#24477a;--thumb:#050505;--hover:#1a1d22;color-scheme:dark}
+html[data-theme="dark"]{--bg:#111;--fg:#fff;--mute:#9a9a9a;--fg0:#fff;--mute0:#9a9a9a;--line:#2a2a2a;--hl:#24477a;--thumb:#050505;--hover:#1a1d22;color-scheme:dark}
 body,.lab,.col,.work img,.idx a,.toc a{transition:background-color .25s ease,color .25s ease,border-color .25s ease}
 @media (prefers-reduced-motion:reduce){body,.lab,.col,.work img,.idx a,.toc a{transition:none}}
 
@@ -27,6 +27,14 @@ body,.lab,.col,.work img,.idx a,.toc a{transition:background-color .25s ease,col
 .theme:active{color:var(--fg)}
 .theme svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
 .theme .i-sun{display:none}
+.eye{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;padding:0;color:var(--mute);border-radius:50%}
+@media (hover:hover){.eye:hover{color:var(--fg);background:var(--hl)}}
+.eye:active{color:var(--fg)}
+.eye svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+.eye .i-eye-off{display:none}
+html.sig-on .eye .i-eye{display:none}
+html.sig-on .eye .i-eye-off{display:block}
+html.sig-on .eye{color:var(--fg)}
 html[data-theme="dark"] .theme .i-moon{display:none}
 html[data-theme="dark"] .theme .i-sun{display:block}
 :focus-visible{outline:2px solid #4b8bdc;outline-offset:2px}
@@ -63,7 +71,13 @@ html[lang="en"] .lang [data-set-lang="en"],html[lang="ko"] .lang [data-set-lang=
 .menu .gap{height:12px}
 .intro{margin-top:26px}
 .intro p{margin-bottom:12px}
-.clock{margin-top:auto;padding-top:28px;color:var(--mute)}
+.clock{margin-top:auto;padding-top:28px;color:var(--mute);display:flex;align-items:center;gap:10px}
+.clock .ct{white-space:nowrap}
+/* a 24-hour strip of the daylight colour at Seoul (see daybar.js) */
+.tbar{flex:1 1 auto;min-width:48px;height:12px;position:relative;border:1px solid var(--line);background:#eee;overflow:hidden}
+.tbar .now{position:absolute;top:-1px;bottom:-1px;width:2px;margin-left:-1px;background:var(--fg);box-shadow:0 0 0 1px var(--bg);left:0}
+html[data-theme="dark"] .tbar{filter:brightness(.62) saturate(1.15)}
+html[data-theme="dark"] .tbar .now{background:#fff}
 .block-title{margin-top:26px}
 
 /* works cards (home) */
