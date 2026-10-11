@@ -140,6 +140,7 @@
     queued = false;
     var m = max(), on = mq.matches && m > 4;
     bar.classList.toggle('on', on);
+    root.classList.toggle('sbh-on', on);
     if (!on) return;
     var span = Math.max(0, track.clientWidth - DIA), ratio = Math.min(1, Math.max(0, window.pageYOffset / m));
     dia.style.transform = 'translateX(' + Math.round(ratio * span) + 'px)';
