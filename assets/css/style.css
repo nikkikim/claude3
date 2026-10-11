@@ -112,6 +112,8 @@ html[lang="en"] .lang [data-set-lang="en"],html[lang="ko"] .lang [data-set-lang=
 .prose{max-width:640px;padding-top:18px}
 .prose p{margin-bottom:14px;font-size:14px;line-height:1.65}
 .prose h2{font-weight:400}
+.prose.sm p{font-size:12px;line-height:1.7}                 /* Bio and Artist Statement: closer to the menu / header text size */
+.prose.sm p.m{font-size:11px}
 .prose .lead{font-size:20px;line-height:1.35;letter-spacing:-.01em}
 .essay{padding:18px 0 26px;border-bottom:1px solid var(--line)}
 .essay h2{font-size:17px;font-weight:700;line-height:1.35;letter-spacing:-.01em;margin:6px 0 4px}
