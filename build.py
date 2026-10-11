@@ -460,7 +460,7 @@ def build_works():
 {medium}
 <div class="pager m">{pager}</div>
 </div>"""
-        mid = (f'<div class="lab"><span class="m">{L(esc(w["title_en"]), esc(w["title_ko"]))}</span></div>'
+        mid = (f'<div class="lab"><span class="cap">{L(esc(w["title_en"]), esc(w["title_ko"]))}</span></div>'
                + "".join(figs))
         right = right_col(index_list(rel, w["slug"]), "Index", "목록", extra=str(total), cls="idx-only")
         t_en = f'{w["title_en"]} ({w["year"]}) — {NAME_EN}'

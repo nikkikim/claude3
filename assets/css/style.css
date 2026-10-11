@@ -58,6 +58,7 @@ a.u:hover,.menu a:hover,.link:hover{background:var(--hl)}
 .lab{flex:none;height:50px;padding-top:14px;border-bottom:1px solid var(--line);margin:0 -14px;padding-left:14px;padding-right:14px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:var(--bg);position:sticky;top:0;z-index:3}
 .brand{display:flex;align-items:center;gap:8px;height:22px}
 .lab .name{text-decoration:none}
+.lab .cap{color:var(--mute);font-size:12px;line-height:16.5px}   /* work page: the title as a light grey caption */
 .lab .name:hover{background:var(--hl)}
 .lang{display:flex;gap:6px;align-items:center;white-space:nowrap}
 .lang button{padding:0 2px;color:var(--mute);text-transform:uppercase}
