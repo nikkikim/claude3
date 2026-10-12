@@ -903,7 +903,7 @@
 
   // ---------------------------------------------------------------- settings (only reachable after logging in)
   function viewSettings() {
-    var tokenCard = card('이 기기에서 토큰 지우기', '이 브라우저에 저장된 토큰을 지워요. 다시 쓰려면 토큰을 새로 붙여넣어야 해요.');
+    var tokenCard = card('이 기기에서 토큰 지우기', '이 브라우저에 저장된 토큰을 지워요. 다시 쓰려면 이 화면의 비밀번호 칸에 GitHub 토큰을 한 번 입력하고 비밀번호를 새로 정해야 해요.');
     tokenCard.append(h('button', { class: 'btn small danger', onclick: function () {
       var msg = '이 기기에 저장된 토큰을 지울까요?' + (isDirty() ? '\n게시하지 않은 변경 사항은 사라져요.' : '');
       if (!confirm(msg)) return;
@@ -1181,55 +1181,54 @@
   }
 
   // ---------------------------------------------------------------- lock / setup screens
-  function renderLock() {
+  // The gate shows nothing but a warning and one field. On a device that already holds a (sealed) token the field takes
+  // the admin password; on a new device it takes the GitHub token itself, then asks for a password to protect it here.
+  function gateBox(lines) {
     var app = $('#app'); app.replaceChildren();
+    var box = h('div', { class: 'lock gate' }, lines); app.append(box); return box;
+  }
+  function renderLock() {
     var vault = getVault();
     var err = h('p', { class: 'err', role: 'alert' });
-    var box = h('div', { class: 'lock' + (vault ? ' gate' : '') });
-    if (!vault) box.append(h('h1', null, '사이트 관리'), h('p', { class: 'mute m' }, cfg.owner + '/' + cfg.repo + ' · ' + cfg.branch));
-
-    if (vault) {
-      var pw = h('input', { type: 'password', autocomplete: 'current-password', autofocus: true, 'aria-label': 'Password', enterkeyhint: 'go' });
-      var go = async function () {
-        if (!pw.value) return;
-        err.textContent = '';
-        var t = await unseal(vault, pw.value);
-        if (!t) { err.textContent = 'Incorrect password.'; return; }
-        sessionPw = pw.value;
+    var pw = h('input', { type: 'password', autocomplete: vault ? 'current-password' : 'off', autofocus: true, 'aria-label': 'Password', enterkeyhint: 'go' });
+    gateBox([h('p', { class: 'warn m' }, 'Restricted area'), h('p', { class: 'warn2' }, 'Password required.'), pw, err]);
+    var wrong = 'Incorrect password.';
+    var go = async function () {
+      var v = vault ? pw.value : pw.value.trim();
+      if (!v) return;
+      err.textContent = '';
+      if (vault) {
+        var t = await unseal(vault, v);
+        if (!t) { err.textContent = wrong; return; }
+        sessionPw = v;
         await enter(t, err);
-      };
-      pw.addEventListener('keydown', function (e) { if (e.key === 'Enter') go(); });
-      box.append(h('p', { class: 'warn m' }, 'Restricted area'), h('p', { class: 'warn2' }, 'Password required.'), pw, err);
-    } else {
-      var tk = h('input', { type: 'password', autocomplete: 'off', placeholder: 'github_pat_…' });
-      var p1 = h('input', { type: 'password', autocomplete: 'new-password' });
-      var p2 = h('input', { type: 'password', autocomplete: 'new-password' });
-      var setup = async function () {
-        err.textContent = '';
-        var t = tk.value.trim();
-        if (!t) { err.textContent = '토큰을 붙여넣어주세요.'; return; }
-        if (p1.value.length < 8) { err.textContent = '비밀번호는 8자 이상으로 정해주세요.'; return; }
-        if (p1.value !== p2.value) { err.textContent = '비밀번호가 서로 달라요.'; return; }
-        sessionPw = p1.value;
-        var ok = await enter(t, err, true);
-        if (ok) { try { localStorage.setItem(VAULT, JSON.stringify(await seal(t, p1.value))); } catch (e) { toast('이 브라우저에는 저장할 수 없어요. 이번에만 사용해요.'); } }
-      };
-      box.append(
-        h('p', null, '처음 한 번만 설정해요. GitHub 토큰을 붙여넣고, 이 기기에서 쓸 비밀번호를 정해주세요.'),
-        h('div', { class: 'steps' }, h('b', null, '토큰 만드는 법'),
-          h('ol', null,
-            h('li', null, h('a', { class: 'link', href: 'https://github.com/settings/personal-access-tokens/new', target: '_blank', rel: 'noopener' }, 'GitHub 토큰 만들기 화면'), '을 열어요.'),
-            h('li', null, 'Token name: 아무 이름 (예: site-admin)'),
-            h('li', null, 'Expiration: 원하는 기간을 골라요. (만료되면 새로 만들어 다시 붙여넣어요.)'),
-            h('li', null, 'Repository access → "Only select repositories" → ' + cfg.repo),
-            h('li', null, 'Permissions → Repository permissions → Contents: "Read and write"'),
-            h('li', null, 'Generate token을 누르고, 나온 토큰(github_pat_로 시작)을 아래에 붙여넣어요.'))),
-        field('GitHub 토큰', tk, '이 기기의 브라우저에만, 비밀번호로 암호화해서 저장돼요.'),
-        field('비밀번호 정하기 (8자 이상)', p1), field('비밀번호 한 번 더', p2), err,
-        h('button', { class: 'btn primary', onclick: setup }, '저장하고 열기'));
-    }
-
-    app.append(box);
+        return;
+      }
+      if (!/^(github_pat_|ghp_)[A-Za-z0-9_]{20,}$/.test(v)) { err.textContent = wrong; return; }
+      token = v;
+      try {
+        var repo = await gh(repoPath());
+        if (repo.permissions && repo.permissions.push === false) throw Object.assign(new Error('push 권한이 없어요'), { status: 403 });
+        token = null; renderSetPassword(v);
+      } catch (e) { token = null; err.textContent = e && e.status === 401 ? wrong : explain(e); }
+    };
+    pw.addEventListener('keydown', function (e) { if (e.key === 'Enter') go(); });
+  }
+  function renderSetPassword(t) {
+    var err = h('p', { class: 'err', role: 'alert' });
+    var p1 = h('input', { type: 'password', autocomplete: 'new-password', autofocus: true, placeholder: 'New password (8+ characters)', 'aria-label': 'New password', enterkeyhint: 'next' });
+    var p2 = h('input', { type: 'password', autocomplete: 'new-password', placeholder: 'Repeat password', 'aria-label': 'Repeat password', enterkeyhint: 'go', style: 'margin-top:8px' });
+    gateBox([h('p', { class: 'warn m' }, 'New device'), h('p', { class: 'warn2' }, 'Choose a password for this device.'), p1, p2, err]);
+    var setup = async function () {
+      err.textContent = '';
+      if (p1.value.length < 8) { err.textContent = 'At least 8 characters.'; return; }
+      if (p1.value !== p2.value) { err.textContent = 'Passwords do not match.'; return; }
+      sessionPw = p1.value;
+      var ok = await enter(t, err, true);
+      if (ok) { try { localStorage.setItem(VAULT, JSON.stringify(await seal(t, p1.value))); } catch (e) { toast('이 브라우저에는 저장할 수 없어요. 이번에만 사용해요.'); } }
+    };
+    p1.addEventListener('keydown', function (e) { if (e.key === 'Enter') p2.focus(); });
+    p2.addEventListener('keydown', function (e) { if (e.key === 'Enter') setup(); });
   }
 
   async function enter(t, errEl, quiet) {

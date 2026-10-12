@@ -30,8 +30,8 @@ build.py                                                        ← content/ 를
 3. Repository access → "Only select repositories" → `claude3`
 4. Permissions → Repository permissions → **Contents: Read and write**
 5. Generate token을 누르고, 나온 토큰(`github_pat_…`)을 복사해요.
-6. `/admin/` 화면에 토큰을 붙여넣고, 이 기기에서 쓸 **비밀번호**를 정해요(8자 이상).
-   토큰은 비밀번호로 암호화되어 이 브라우저에만 저장돼요. 다음부터는 비밀번호만 입력하면 돼요.
+6. `/admin/` 화면에는 `Restricted area / Password required.`와 입력칸 하나만 보여요. 처음 쓰는 기기에서는 이 칸에 방금 복사한 토큰(`github_pat_…`)을 붙여넣고 Enter를 누르면 이 기기에서 쓸 **비밀번호**(8자 이상)를 정하는 화면이 나와요.
+   토큰은 비밀번호로 암호화되어 이 브라우저에만 저장돼요. 다음부터는 같은 칸에 비밀번호만 입력하면 돼요.
    다른 기기에서는 토큰을 한 번 더 붙여넣어야 해요.
 
 **고치고 게시하기**: 왼쪽 메뉴에서 고르고, 고친 뒤 위쪽의 **게시하기**를 눌러요. 모든 변경이 한 번에 GitHub에 저장되고, GitHub Actions가 페이지를 새로 만들어요. "완성됐어요!" 메시지가 뜨고 1~2분 뒤 사이트에 반영돼요. 잘못 고쳤다면 게시하기 전에는 "변경 버리기"로 되돌릴 수 있고, 게시한 뒤에는 GitHub의 커밋 기록에서 되돌릴 수 있어요.
