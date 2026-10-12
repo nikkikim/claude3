@@ -71,7 +71,11 @@ html[lang="en"] .lang [data-set-lang="en"],html[lang="ko"] .lang [data-set-lang=
 .menu .gap{height:12px}
 .intro{margin-top:26px}
 .intro p{margin-bottom:12px}
-.clock{margin-top:auto;padding-top:28px;color:var(--mute)}
+.clock{margin-top:auto;padding-top:28px;color:var(--mute);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.key{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;color:#c4c4c4;text-decoration:none}
+.key svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+@media (hover:hover){.key:hover{color:var(--mute);background:var(--hl)}}
+html[data-theme="dark"] .key{color:#555}
 .block-title{margin-top:26px}
 
 /* works cards (home) */
@@ -179,5 +183,6 @@ html[lang="en"] .lang [data-set-lang="en"],html[lang="ko"] .lang [data-set-lang=
   .bento-panel a{display:block;padding:10px 0;border-bottom:1px solid var(--line);text-decoration:none}
   .bento-panel a[aria-current="page"]{text-decoration:underline;text-underline-offset:3px}
   .bento-panel .gap{height:10px}
+  .bento-panel a.key{display:inline-flex;padding:0;border-bottom:0;margin-top:12px}
   .bento-panel a:last-child{border-bottom:0}
 }

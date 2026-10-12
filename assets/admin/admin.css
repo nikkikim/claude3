@@ -36,6 +36,13 @@ a{color:inherit}
 .lock summary{cursor:pointer;color:var(--mute)}
 .err{color:var(--danger);margin:10px 0;min-height:1.5em}
 
+/* password gate: nothing but the warning and one field */
+.lock.gate{max-width:320px;margin:0;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:calc(100% - 40px);text-align:center}
+.gate .warn{color:var(--danger);letter-spacing:.06em;margin:0 0 4px}
+.gate .warn2{font-size:15px;color:var(--fg);margin:0 0 16px}
+.gate input{text-align:center;font-size:16px}
+.gate .err{min-height:1.6em;font-size:13px}
+
 /* forms */
 label.f{display:grid;gap:4px;margin-bottom:14px}
 label.f>.m{color:var(--mute)}

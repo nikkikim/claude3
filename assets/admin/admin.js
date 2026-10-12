@@ -81,7 +81,7 @@
     content: null, origSer: null, deletedWorks: [], build: null, media: null
   };
   var KEYS = ['works', 'site', 'pages', 'bio', 'statement', 'cv', 'texts'];
-  var VIEWS = [['works', '작품'], ['pages', '메뉴·페이지'], ['media', '파비콘·미리보기'], ['seo', '검색·홍보'], ['stats', '방문 통계'], ['site', '사이트 정보'], ['bio', '소개 Bio'], ['statement', '작가노트'], ['cv', '이력 CV'], ['texts', '글 Texts']];
+  var VIEWS = [['works', '작품'], ['pages', '메뉴·페이지'], ['media', '파비콘·미리보기'], ['seo', '검색·홍보'], ['stats', '방문 통계'], ['settings', '설정'], ['site', '사이트 정보'], ['bio', '소개 Bio'], ['statement', '작가노트'], ['cv', '이력 CV'], ['texts', '글 Texts']];
   var RESERVED = ['bio', 'statement', 'works', 'cv', 'texts', 'contact', 'admin', 'assets', 'content', 'index', '404', 'sitemap', 'robots', 'favicon', 'cname', 'node_modules'];
   var FAV_FILES = ['assets/favicon.ico', 'assets/favicon-32.png', 'assets/favicon-192.png', 'assets/apple-touch-icon.png'];
   var OG_FILE = 'assets/og.jpg';
@@ -901,6 +901,26 @@
     return h('div', null, body);
   }
 
+  // ---------------------------------------------------------------- settings (only reachable after logging in)
+  function viewSettings() {
+    var tokenCard = card('이 기기에서 토큰 지우기', '이 브라우저에 저장된 토큰을 지워요. 다시 쓰려면 토큰을 새로 붙여넣어야 해요.');
+    tokenCard.append(h('button', { class: 'btn small danger', onclick: function () {
+      var msg = '이 기기에 저장된 토큰을 지울까요?' + (isDirty() ? '\n게시하지 않은 변경 사항은 사라져요.' : '');
+      if (!confirm(msg)) return;
+      try { localStorage.removeItem(VAULT); localStorage.removeItem(GCKEY); } catch (e) {}
+      token = null; sessionPw = null; GC.token = null; GC.tokenLoaded = false; GC.data = null;
+      S.content = null; S.phase = 'lock'; S.build = null; renderLock();
+    } }, '토큰 지우기'));
+    var advCard = card('고급 설정', '저장소나 브랜치를 옮겼을 때만 바꿔요. 저장한 뒤 새로 열면 적용돼요.');
+    advCard.append(
+      h('div', { class: 'row2' }, field('소유자', textInput(cfg, 'owner')), field('저장소', textInput(cfg, 'repo'))),
+      field('브랜치', textInput(cfg, 'branch')),
+      h('button', { class: 'btn small', onclick: function () {
+        try { localStorage.setItem(CFGKEY, JSON.stringify({ owner: cfg.owner, repo: cfg.repo, branch: cfg.branch })); toast('저장했어요.'); } catch (e) {}
+      } }, '설정 저장'));
+    return h('div', null, h('h2', null, '설정'), h('p', { class: 'lead' }, '이 기기와 저장소 연결에 관한 설정이에요.'), tokenCard, advCard);
+  }
+
   // ---------------------------------------------------------------- shell
   function renderPanel() {
     var p = $('#panel'); if (!p) return;
@@ -911,6 +931,7 @@
     else if (v === 'media') node = viewMedia();
     else if (v === 'seo') node = viewSeo();
     else if (v === 'stats') node = viewStats();
+    else if (v === 'settings') node = viewSettings();
     else if (v === 'bio') node = viewParas('bio', '소개 Bio', '소개 글이에요.');
     else if (v === 'statement') node = viewParas('statement', '작가노트', '작가노트 글이에요.');
     else if (v === 'cv') node = viewCv();
@@ -1164,25 +1185,21 @@
     var app = $('#app'); app.replaceChildren();
     var vault = getVault();
     var err = h('p', { class: 'err', role: 'alert' });
-    var box = h('div', { class: 'lock' });
-    box.append(h('h1', null, '사이트 관리'), h('p', { class: 'mute m' }, cfg.owner + '/' + cfg.repo + ' · ' + cfg.branch));
+    var box = h('div', { class: 'lock' + (vault ? ' gate' : '') });
+    if (!vault) box.append(h('h1', null, '사이트 관리'), h('p', { class: 'mute m' }, cfg.owner + '/' + cfg.repo + ' · ' + cfg.branch));
 
     if (vault) {
-      var pw = h('input', { type: 'password', autocomplete: 'current-password', autofocus: true });
+      var pw = h('input', { type: 'password', autocomplete: 'current-password', autofocus: true, 'aria-label': 'Password', enterkeyhint: 'go' });
       var go = async function () {
         if (!pw.value) return;
         err.textContent = '';
         var t = await unseal(vault, pw.value);
-        if (!t) { err.textContent = '비밀번호가 맞지 않아요.'; return; }
+        if (!t) { err.textContent = 'Incorrect password.'; return; }
         sessionPw = pw.value;
         await enter(t, err);
       };
       pw.addEventListener('keydown', function (e) { if (e.key === 'Enter') go(); });
-      box.append(h('p', null, '비밀번호를 입력하세요.'), field('비밀번호', pw), err,
-        h('button', { class: 'btn primary', onclick: go }, '열기'),
-        h('details', null, h('summary', null, '이 기기에서 토큰 지우기'),
-          h('p', { style: 'margin:10px 0' }, '이 브라우저에 저장된 토큰을 지워요. 다시 쓰려면 토큰을 새로 붙여넣어야 해요.'),
-          h('button', { class: 'btn small danger', onclick: function () { if (confirm('이 기기에 저장된 토큰을 지울까요?')) { localStorage.removeItem(VAULT); renderLock(); } } }, '토큰 지우기')));
+      box.append(h('p', { class: 'warn m' }, 'Restricted area'), h('p', { class: 'warn2' }, 'Password required.'), pw, err);
     } else {
       var tk = h('input', { type: 'password', autocomplete: 'off', placeholder: 'github_pat_…' });
       var p1 = h('input', { type: 'password', autocomplete: 'new-password' });
@@ -1212,13 +1229,6 @@
         h('button', { class: 'btn primary', onclick: setup }, '저장하고 열기'));
     }
 
-    var adv = h('details', null, h('summary', null, '고급 설정'),
-      h('div', { style: 'margin-top:10px' },
-        field('소유자', textInput(cfg, 'owner')), field('저장소', textInput(cfg, 'repo')), field('브랜치', textInput(cfg, 'branch')),
-        h('button', { class: 'btn small', onclick: function () {
-          try { localStorage.setItem(CFGKEY, JSON.stringify({ owner: cfg.owner, repo: cfg.repo, branch: cfg.branch })); toast('저장했어요.'); } catch (e) {}
-        } }, '설정 저장')));
-    box.append(adv);
     app.append(box);
   }
 

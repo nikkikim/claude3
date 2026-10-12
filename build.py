@@ -376,11 +376,11 @@ def page(*, rel, path, title_en, title_ko, desc, left_extra="", mid, right, curr
     <button type="button" class="theme" data-theme-toggle aria-pressed="false" aria-label="Dark mode" title="Dark / Light"><svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.6A8.2 8.2 0 0 1 9.4 4a8.2 8.2 0 1 0 10.6 10.6z"/></svg><svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5.3 5.3l1.7 1.7M17 17l1.7 1.7M5.3 18.7 7 17M17 7l1.7-1.7"/></svg></button>
     <button type="button" class="eye" data-eye-toggle aria-pressed="false" aria-label="Signal mode / 신호 모드" title="Signal mode: text becomes signal, drag to read"><svg class="i-eye" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="i-eye-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6 5 10 5 10-5 10-5"/><path d="M5.5 15.2 4 17.5M10 17.2l-.8 2.6M14 17.2l.8 2.6M18.5 15.2l1.5 2.3"/></svg></button>
     </div>
-    <nav class="bento-panel m" id="bento-panel" aria-label="Menu" hidden>{menu_html}</nav>
+    <nav class="bento-panel m" id="bento-panel" aria-label="Menu" hidden>{menu_html}<a class="key" href="{rel}admin/" aria-label="Admin" title="Admin"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="7.5" cy="12" r="3.6"/><path d="M11.1 12H21M17.5 12v3.2M21 12v2.4"/></svg></a></nav>
   </div>
   <nav class="menu m" aria-label="Main">{menu_html}</nav>
   {left_extra}
-  <div class="clock m"><span data-clock>--:--:--</span> Seoul</div>
+  <div class="clock m"><span><span data-clock>--:--:--</span> Seoul</span><a class="key" href="{rel}admin/" aria-label="Admin" title="Admin"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="7.5" cy="12" r="3.6"/><path d="M11.1 12H21M17.5 12v3.2M21 12v2.4"/></svg></a></div>
 </aside>
 <main class="col mid" id="main">
 {mid}
