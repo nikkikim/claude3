@@ -53,6 +53,7 @@ a.u:hover,.menu a:hover,.link:hover{background:var(--hl)}
 
 /* frame */
 .cols{display:grid;grid-template-columns:25% 46% 29%}
+.cols.cv{grid-template-columns:25% 35% 40%}                 /* CV page: two content columns */
 .col{border-left:1px solid var(--line);padding:0 14px 40px;min-width:0}
 .col.left{border-left:0}
 .lab{flex:none;height:50px;padding-top:14px;border-bottom:1px solid var(--line);margin:0 -14px;padding-left:14px;padding-right:14px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:var(--bg);position:sticky;top:0;z-index:3}

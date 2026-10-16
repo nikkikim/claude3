@@ -97,3 +97,4 @@ Wix 요금제를 해지하기 전에 이 사이트가 정상으로 열리는지 
   - "이 기기의 내 방문은 집계하지 않기"로 내 방문을 뺄 수 있어요(브라우저마다 따로).
 - **모바일 읽기 표시줄**: 폭 960px 미만에서는 레트로 스크롤바가 이름·메뉴 영역 아래 선에 가로로 나타나 읽은 위치를 보여줘요(◆ 끌기, 양 끝 칸은 맨 위/맨 아래, 화살표는 한 화면씩). `assets/js/scrollbar.js`의 `.sbh` 블록과 `assets/css/scrollbar.css`의 `.sbh` 블록을 지우면 사라져요.
 - **모바일 메뉴 버튼**: 폭 960px 미만에서는 이름 옆의 점 9개(도시락) 버튼을 누르면 페이지 어느 위치에서든 메뉴가 펼쳐져요. 메뉴는 "메뉴·페이지" 설정을 그대로 따라가요. 지우려면 `build.py`의 `bento` 버튼·`bento-panel`과 `style.css`/`site.js`의 bento 블록을 지우세요.
+- **CV 페이지 분할(PC)**: 이력 페이지는 가운데 열에 Education · Affiliations · Professional Activities · Certifications(한국어: 학력 · 경력 · 심사 및 특강 · 자격증), 오른쪽 열에 Awards · Solo Exhibitions · Group Exhibitions/Screenings(수상 · 개인전 · 단체전/스크리닝)를 두고 열마다 따로 스크롤돼요. 섹션은 제목에 이 단어들이 들어 있으면 자동으로 해당 열로 가요. 관리 페이지에서 새로 만든 섹션은 왼쪽 열 맨 아래에 붙어요. 모바일은 위에서 아래로 한 줄로 이어져요.

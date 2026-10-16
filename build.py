@@ -285,6 +285,33 @@ def cv_sections(lang, home_only=False):
     return "".join(out)
 
 
+# the CV page is split in two scrolling columns; sections are matched by their (English or Korean) heading
+CV_LEFT = [("education", "학력"), ("affiliation", "경력"), ("professional", "심사"), ("certification", "자격")]
+CV_RIGHT = [("award", "수상"), ("solo", "개인전"), ("group", "단체전")]
+
+
+def cv_column(lang, side):
+    """sections of one column of the CV page, in the order Education, Affiliations, ... / Awards, Solo, Group"""
+    order = CV_LEFT if side == "left" else CV_RIGHT
+    picked = []
+    for sec in CV[lang]:
+        h = sec["heading"].lower()
+        hit = [i for i, keys in enumerate(order) if any(k in h for k in keys)]
+        other = [i for i, keys in enumerate(CV_RIGHT if side == "left" else CV_LEFT) if any(k in h for k in keys)]
+        if hit:
+            picked.append((hit[0], sec))
+        elif not other and side == "left":      # a section added in the admin that matches neither list
+            picked.append((len(order), sec))
+    picked.sort(key=lambda t: t[0])
+    return "".join(f'<section class="cv-sec"><h2 class="m mute">{esc(sec["heading"])}</h2>{cv_rows(sec["items"])}</section>'
+                   for _, sec in picked)
+
+
+def cv_split(side):
+    return (f'<div data-l="en" lang="en">{cv_column("en", side)}</div>'
+            f'<div data-l="ko" lang="ko">{cv_column("ko", side)}</div>')
+
+
 def bilingual_cv(**kw):
     return (f'<div data-l="en" lang="en">{cv_sections("en", **kw)}</div>'
             f'<div data-l="ko" lang="ko">{cv_sections("ko", **kw)}</div>')
@@ -314,7 +341,7 @@ def icon_links(rel):
 
 
 def page(*, rel, path, title_en, title_ko, desc, left_extra="", mid, right, current=None,
-         og_image=None, canonical=None, noindex=False, extra_head="", scripts=()):
+         og_image=None, canonical=None, noindex=False, extra_head="", scripts=(), cols_cls=""):
     menu = []
     for key, href, en, ko in menu_items():
         cur = ' aria-current="page"' if key == current else ""
@@ -366,7 +393,7 @@ def page(*, rel, path, title_en, title_ko, desc, left_extra="", mid, right, curr
 </head>
 <body data-title-en="{esc(title_en)}" data-title-ko="{esc(title_ko)}">
 <a class="skip" href="#main">Skip to content</a>
-<div class="cols">
+<div class="cols{cols_cls}">
 <aside class="col left">
   <div class="lab">
     <div class="brand"><a class="name m" href="{rel or './'}">{L(NAME_EN, NAME_KO)}</a>
@@ -512,10 +539,12 @@ def build_statement():
 def build_cv():
     rel = "../"
     mid = (f'<div class="lab"><span class="m">{L(*T("cv"))}</span><span class="m mute">{portfolio_link(rel, False)}</span></div>'
-           + bilingual_cv())
+           + cv_split("left"))
+    right = (f'<aside class="col right"><div class="lab"><span class="m">{L("Awards &amp; Exhibitions", "수상 및 전시")}</span></div>'
+             + cv_split("right") + '</aside>')
     write("cv/index.html", page(rel=rel, path="cv/", title_en=f"{PAGE['cv']['title_en']} — {NAME_EN}",
                                 title_ko=f"{PAGE['cv']['title_ko']} — {NAME_KO}",
-                                desc=META_DESC, mid=mid, right=side_index(rel, None), current="cv"))
+                                desc=META_DESC, mid=mid, right=right, current="cv", cols_cls=" cv"))
 
 
 def essay_en(e):
