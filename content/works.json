@@ -1,57 +1,6 @@
 [
  {
   "n": 1,
-  "slug": "sick-and-dreaming",
-  "year": 2026,
-  "title_en": "Sick and Dreaming",
-  "title_ko": "병든-꿈꾸는",
-  "medium": "single-channel video, color, sound, 5 min 7 sec",
-  "images": [
-   {
-    "f": "umvdox8c50.jpg",
-    "w": 1400,
-    "h": 700
-   },
-   {
-    "f": "umvdoyf1z0.jpg",
-    "w": 1400,
-    "h": 700
-   },
-   {
-    "f": "umvdoyf3b1.jpg",
-    "w": 1400,
-    "h": 700
-   },
-   {
-    "f": "umvdoyf532.jpg",
-    "w": 1400,
-    "h": 700
-   },
-   {
-    "f": "umvdoyf6f3.jpg",
-    "w": 1400,
-    "h": 700
-   },
-   {
-    "f": "umvdoyf7l4.jpg",
-    "w": 1400,
-    "h": 700
-   },
-   {
-    "f": "umvdoyf8q5.jpg",
-    "w": 1400,
-    "h": 700
-   },
-   {
-    "f": "umvdoyfa16.jpg",
-    "w": 1400,
-    "h": 700
-   }
-  ],
-  "videos": []
- },
- {
-  "n": 2,
   "slug": "hyperobject",
   "year": 2026,
   "title_en": "Hyperobject",
@@ -137,7 +86,7 @@
   "videos": []
  },
  {
-  "n": 3,
+  "n": 2,
   "slug": "life-in-the-shape-of-clouds-ix",
   "year": 2026,
   "title_en": "Life in the Shape of Clouds I–X",
@@ -218,7 +167,7 @@
   "videos": []
  },
  {
-  "n": 4,
+  "n": 3,
   "slug": "folded-figure-with-flower",
   "year": 2026,
   "title_en": "Folded Figure with Flower",
@@ -244,6 +193,57 @@
     "f": "04.jpg",
     "w": 512,
     "h": 512
+   }
+  ],
+  "videos": []
+ },
+ {
+  "n": 4,
+  "slug": "sick-and-dreaming",
+  "year": 2026,
+  "title_en": "Sick and Dreaming",
+  "title_ko": "병든-꿈꾸는",
+  "medium": "single-channel video, color, sound, 5 min 7 sec",
+  "images": [
+   {
+    "f": "umvdox8c50.jpg",
+    "w": 1400,
+    "h": 700
+   },
+   {
+    "f": "umvdoyf1z0.jpg",
+    "w": 1400,
+    "h": 700
+   },
+   {
+    "f": "umvdoyf3b1.jpg",
+    "w": 1400,
+    "h": 700
+   },
+   {
+    "f": "umvdoyf532.jpg",
+    "w": 1400,
+    "h": 700
+   },
+   {
+    "f": "umvdoyf6f3.jpg",
+    "w": 1400,
+    "h": 700
+   },
+   {
+    "f": "umvdoyf7l4.jpg",
+    "w": 1400,
+    "h": 700
+   },
+   {
+    "f": "umvdoyf8q5.jpg",
+    "w": 1400,
+    "h": 700
+   },
+   {
+    "f": "umvdoyfa16.jpg",
+    "w": 1400,
+    "h": 700
    }
   ],
   "videos": []
