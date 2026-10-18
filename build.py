@@ -341,7 +341,7 @@ def icon_links(rel):
 
 
 def page(*, rel, path, title_en, title_ko, desc, left_extra="", mid, right, current=None,
-         og_image=None, canonical=None, noindex=False, extra_head="", scripts=(), cols_cls=""):
+         og_image=None, canonical=None, noindex=False, extra_head="", scripts=(), cols_cls="", no_canonical=False):
     menu = []
     for key, href, en, ko in menu_items():
         cur = ' aria-current="page"' if key == current else ""
@@ -374,12 +374,12 @@ def page(*, rel, path, title_en, title_ko, desc, left_extra="", mid, right, curr
 <script>(function(){{try{{var q=new URLSearchParams(location.search).get('lang'),s=localStorage.getItem('lang'),l=(q==='ko'||q==='en')?q:(s==='ko'||s==='en'?s:'en');document.documentElement.lang=l;}}catch(e){{}}}})();</script>
 <title>{esc(title_en)}</title>
 <meta name="description" content="{esc(desc)}">
-<link rel="canonical" href="{canon}">
+{'' if no_canonical else f'<link rel="canonical" href="{canon}">'}
 <meta property="og:site_name" content="{NAME_EN}">
 <meta property="og:title" content="{esc(title_en)}">
 <meta property="og:description" content="{esc(desc)}">
 <meta property="og:type" content="website">
-<meta property="og:url" content="{canon}">
+{'' if no_canonical else f'<meta property="og:url" content="{canon}">'}
 {og}<meta name="twitter:card" content="{card}">
 {robots}{extra_head}<meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#ffffff">
@@ -636,12 +636,32 @@ def build_custom_pages():
             scripts=("lock.js",) if locked else ()))
 
 
+def legacy_redirect_script():
+    """404.html forwards visitors who arrive on an old Wix address to the matching page of the new site"""
+    try:
+        data = load("redirects.json")
+    except FileNotFoundError:
+        return ""
+    have = {w["slug"] for w in WORKS}
+    works = {k: v for k, v in data.get("works", {}).items() if v in have}
+    pages = {k: v for k, v in data.get("pages", {}).items()}
+    js = json.dumps({"w": works, "p": pages}, ensure_ascii=False).replace("<", "\\u003c")
+    return ("<script>(function(){try{var R=" + js + ";var p=decodeURIComponent(location.pathname).normalize('NFC').toLowerCase().replace(/^\\/+|\\/+$/g,'');"
+            "var t=null,m=p.match(/^portfolio-collections\\/recent-works\\/([^\\/]+)$/);"
+            "if(m&&Object.prototype.hasOwnProperty.call(R.w,m[1]))t='/works/'+R.w[m[1]]+'/';"
+            "else if(/^portfolio-collections(\\/recent-works)?$/.test(p))t='/#works';"
+            "else if(Object.prototype.hasOwnProperty.call(R.p,p))t='/'+R.p[p];"
+            "if(t!==null){window.goatcounter={no_onload:true};location.replace(t+(t.indexOf('#')<0?location.search:''));}}catch(e){}})();</script>")
+
+
 def build_404():
     rel = "/"
     mid = (f'<div class="lab"><span class="m">404</span></div><div class="prose"><p class="lead">{L("Page not found.", "페이지를 찾을 수 없습니다.")}</p>'
            f'<p class="m"><a class="u" href="/">{L("Back to home", "홈으로")}</a></p></div>')
+    # no canonical link here: the visit statistics then record the address that was really asked for
     write("404.html", page(rel=rel, path="404.html", title_en="Not found — Dasul Kim", title_ko="페이지 없음 — 김다슬",
-                           desc=META_DESC, mid=mid, right='<aside class="col right idx-only"></aside>'))
+                           desc=META_DESC, mid=mid, right='<aside class="col right idx-only"></aside>', noindex=True,
+                           no_canonical=True, extra_head=legacy_redirect_script()))
 
 
 def build_meta():
