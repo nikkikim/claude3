@@ -30,8 +30,8 @@ build.py                                                        ← content/ 를
 3. Repository access → "Only select repositories" → `claude3`
 4. Permissions → Repository permissions → **Contents: Read and write**
 5. Generate token을 누르고, 나온 토큰(`github_pat_…`)을 복사해요.
-6. `/admin/` 화면에는 `Restricted area / Password required.`와 입력칸 하나만 보여요. 처음 쓰는 기기에서는 이 칸에 방금 복사한 토큰(`github_pat_…`)을 붙여넣고 Enter를 누르면 이 기기에서 쓸 **비밀번호**(8자 이상)를 정하는 화면이 나와요.
-   토큰은 비밀번호로 암호화되어 이 브라우저에만 저장돼요. 다음부터는 같은 칸에 비밀번호만 입력하면 돼요.
+6. `/admin/` 화면에는 입력칸 하나와 `Enter` 버튼만 보여요. 처음 쓰는 기기에서는 `Token required.`가 나오니 이 칸에 방금 복사한 토큰(`github_pat_…`)을 붙여넣고 Enter를 누르면 이 기기에서 쓸 **비밀번호**(8자 이상)를 정하는 화면이 나와요.
+   토큰은 비밀번호로 암호화되어 이 브라우저에만 저장돼요. 다음부터는 `Password required.`가 나오는 같은 칸에 비밀번호만 입력하면 돼요.
    다른 기기에서는 토큰을 한 번 더 붙여넣어야 해요.
 
 **고치고 게시하기**: 왼쪽 메뉴에서 고르고, 고친 뒤 위쪽의 **게시하기**를 눌러요. 모든 변경이 한 번에 GitHub에 저장되고, GitHub Actions가 페이지를 새로 만들어요. "완성됐어요!" 메시지가 뜨고 1~2분 뒤 사이트에 반영돼요. 잘못 고쳤다면 게시하기 전에는 "변경 버리기"로 되돌릴 수 있고, 게시한 뒤에는 GitHub의 커밋 기록에서 되돌릴 수 있어요.
@@ -99,3 +99,4 @@ Wix 요금제를 해지하기 전에 이 사이트가 정상으로 열리는지 
 - **모바일 메뉴 버튼**: 폭 960px 미만에서는 이름 옆의 점 9개(도시락) 버튼을 누르면 페이지 어느 위치에서든 메뉴가 펼쳐져요. 메뉴는 "메뉴·페이지" 설정을 그대로 따라가요. 지우려면 `build.py`의 `bento` 버튼·`bento-panel`과 `style.css`/`site.js`의 bento 블록을 지우세요.
 - **CV 페이지 분할(PC)**: 이력 페이지는 가운데 열에 Education · Affiliations · Professional Activities · Certifications(한국어: 학력 · 경력 · 심사 및 특강 · 자격증), 오른쪽 열에 Awards · Solo Exhibitions · Group Exhibitions/Screenings(수상 · 개인전 · 단체전/스크리닝)를 두고 열마다 따로 스크롤돼요. 섹션은 제목에 이 단어들이 들어 있으면 자동으로 해당 열로 가요. 관리 페이지에서 새로 만든 섹션은 왼쪽 열 맨 아래에 붙어요. 모바일은 위에서 아래로 한 줄로 이어져요.
 - **옛 Wix 주소 연결**: 예전 사이트 주소(`/portfolio-collections/recent-works/…`, `/about` 등)로 들어온 방문자는 `404.html`이 새 주소로 자동으로 보내줘요. 대응표는 `content/redirects.json`에 있어요. 없는 주소로 들어오면 "Page not found" 화면이 나오고, 방문 통계(GoatCounter)에는 `404.html`이 아니라 실제로 입력된 주소가 제목 "Not found — Dasul Kim"과 함께 기록돼요.
+- **언어 기본값**: 사이트는 새로 접속할 때마다 항상 영어로 시작해요. EN/KR 버튼으로 바꾼 언어는 그 방문(탭) 안에서만 유지되고, 주소 끝에 `?lang=ko`를 붙이면 한국어로 열려요.

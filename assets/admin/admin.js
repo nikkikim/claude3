@@ -989,6 +989,7 @@
           h('span', { class: 'm mute', id: 'dirtyinfo' }, ''),
           h('button', { class: 'btn small', id: 'discard', onclick: discard }, '변경 버리기'),
           h('button', { class: 'btn primary', id: 'publish', onclick: publish }, '게시하기'),
+          h('a', { class: 'btn small', href: 'https://www.dasulkim.com/', target: '_blank', rel: 'noopener' }, '사이트 보기 ↗'),
           h('button', { class: 'btn small', onclick: lock }, '잠그기'))),
       h('div', { class: 'build', id: 'build' }),
       h('div', { class: 'body' }, nav, h('main', { class: 'panel', id: 'panel' })));
@@ -1187,45 +1188,69 @@
     var app = $('#app'); app.replaceChildren();
     var box = h('div', { class: 'lock gate' }, lines); app.append(box); return box;
   }
+  // an input with a button next to it that does the same as pressing Enter
+  function gateRow(input, onGo, label) {
+    var btn = h('button', { type: 'button', class: 'btn primary gobtn', onclick: onGo }, label || 'Enter');
+    return { row: h('div', { class: 'gaterow' }, input, btn), btn: btn };
+  }
+  function explainEn(e) {
+    if (e && e.status === 401) return 'Invalid or expired token.';
+    if (e && e.status === 403) return 'This token has no permission (needs Contents: Read and write).';
+    if (e && e.status === 404) return 'Repository or branch not found.';
+    return 'Something went wrong: ' + (e && e.message ? e.message : e);
+  }
   function renderLock() {
     var vault = getVault();
     var err = h('p', { class: 'err', role: 'alert' });
-    var pw = h('input', { type: 'password', autocomplete: vault ? 'current-password' : 'off', autofocus: true, 'aria-label': 'Password', enterkeyhint: 'go' });
-    gateBox([h('p', { class: 'warn m' }, 'Restricted area'), h('p', { class: 'warn2' }, 'Password required.'), pw, err]);
-    var wrong = 'Incorrect password.';
+    // a device that already holds a sealed token asks for the password; a new device asks for the token itself
+    var pw = h('input', vault
+      ? { type: 'password', autocomplete: 'current-password', autofocus: true, 'aria-label': 'Password', enterkeyhint: 'go' }
+      : { type: 'password', autocomplete: 'off', autofocus: true, placeholder: 'github_pat_…', 'aria-label': 'GitHub token', enterkeyhint: 'go' });
+    var busy = false, g = gateRow(pw, function () { go(); });
+    gateBox([h('p', { class: 'warn m' }, 'Restricted area'), h('p', { class: 'warn2' }, vault ? 'Password required.' : 'Token required.'), g.row, err]);
+    var wrong = vault ? 'Incorrect password.' : 'Invalid token.';
     var go = async function () {
+      if (busy) return;
       var v = vault ? pw.value : pw.value.trim();
       if (!v) return;
-      err.textContent = '';
-      if (vault) {
-        var t = await unseal(vault, v);
-        if (!t) { err.textContent = wrong; return; }
-        sessionPw = v;
-        await enter(t, err);
-        return;
-      }
-      if (!/^(github_pat_|ghp_)[A-Za-z0-9_]{20,}$/.test(v)) { err.textContent = wrong; return; }
-      token = v;
+      busy = true; g.btn.disabled = true; err.textContent = 'Checking…';
       try {
-        var repo = await gh(repoPath());
-        if (repo.permissions && repo.permissions.push === false) throw Object.assign(new Error('push 권한이 없어요'), { status: 403 });
-        token = null; renderSetPassword(v);
-      } catch (e) { token = null; err.textContent = e && e.status === 401 ? wrong : explain(e); }
+        if (vault) {
+          var t = await unseal(vault, v);
+          if (!t) { err.textContent = wrong; return; }
+          sessionPw = v;
+          err.textContent = 'Checking…';
+          await enter(t, err);
+          return;
+        }
+        if (!/^(github_pat_|ghp_)[A-Za-z0-9_]{20,}$/.test(v)) { err.textContent = wrong; return; }
+        token = v;
+        try {
+          var repo = await gh(repoPath());
+          if (repo.permissions && repo.permissions.push === false) throw Object.assign(new Error('no push permission'), { status: 403 });
+          token = null; renderSetPassword(v);
+        } catch (e) { token = null; err.textContent = explainEn(e); }
+      } finally { busy = false; g.btn.disabled = false; }
     };
     pw.addEventListener('keydown', function (e) { if (e.key === 'Enter') go(); });
   }
   function renderSetPassword(t) {
     var err = h('p', { class: 'err', role: 'alert' });
     var p1 = h('input', { type: 'password', autocomplete: 'new-password', autofocus: true, placeholder: 'New password (8+ characters)', 'aria-label': 'New password', enterkeyhint: 'next' });
-    var p2 = h('input', { type: 'password', autocomplete: 'new-password', placeholder: 'Repeat password', 'aria-label': 'Repeat password', enterkeyhint: 'go', style: 'margin-top:8px' });
-    gateBox([h('p', { class: 'warn m' }, 'New device'), h('p', { class: 'warn2' }, 'Choose a password for this device.'), p1, p2, err]);
+    var p2 = h('input', { type: 'password', autocomplete: 'new-password', placeholder: 'Repeat password', 'aria-label': 'Repeat password', enterkeyhint: 'go' });
+    var busy = false, g = gateRow(p2, function () { setup(); });
+    g.row.style.marginTop = '8px';
+    gateBox([h('p', { class: 'warn m' }, 'New device'), h('p', { class: 'warn2' }, 'Choose a password for this device.'), p1, g.row, err]);
     var setup = async function () {
+      if (busy) return;
       err.textContent = '';
       if (p1.value.length < 8) { err.textContent = 'At least 8 characters.'; return; }
       if (p1.value !== p2.value) { err.textContent = 'Passwords do not match.'; return; }
+      busy = true; g.btn.disabled = true;
       sessionPw = p1.value;
       var ok = await enter(t, err, true);
       if (ok) { try { localStorage.setItem(VAULT, JSON.stringify(await seal(t, p1.value))); } catch (e) { toast('이 브라우저에는 저장할 수 없어요. 이번에만 사용해요.'); } }
+      else { busy = false; g.btn.disabled = false; }
     };
     p1.addEventListener('keydown', function (e) { if (e.key === 'Enter') p2.focus(); });
     p2.addEventListener('keydown', function (e) { if (e.key === 'Enter') setup(); });
@@ -1233,10 +1258,10 @@
 
   async function enter(t, errEl, quiet) {
     token = t;
-    errEl.textContent = '확인하는 중…';
+    errEl.textContent = 'Checking…';
     try {
       var repo = await gh(repoPath());
-      if (repo.permissions && repo.permissions.push === false) throw Object.assign(new Error('push 권한이 없어요'), { status: 403 });
+      if (repo.permissions && repo.permissions.push === false) throw Object.assign(new Error('no push permission'), { status: 403 });
       S.phase = 'loading';
       await loadContent();
       S.phase = 'main'; S.view = 'works';
@@ -1244,7 +1269,7 @@
       return true;
     } catch (e) {
       token = null; S.phase = 'lock';
-      errEl.textContent = explain(e);
+      errEl.textContent = explainEn(e);
       return false;
     }
   }

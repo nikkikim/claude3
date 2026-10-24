@@ -371,7 +371,7 @@ def page(*, rel, path, title_en, title_ko, desc, left_extra="", mid, right, curr
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<script>(function(){{try{{var q=new URLSearchParams(location.search).get('lang'),s=localStorage.getItem('lang'),l=(q==='ko'||q==='en')?q:(s==='ko'||s==='en'?s:'en');document.documentElement.lang=l;}}catch(e){{}}}})();</script>
+<script>(function(){{try{{var q=new URLSearchParams(location.search).get('lang'),s=sessionStorage.getItem('lang'),l=(q==='ko'||q==='en')?q:(s==='ko'||s==='en'?s:'en');document.documentElement.lang=l;}}catch(e){{}}}})();</script>
 <title>{esc(title_en)}</title>
 <meta name="description" content="{esc(desc)}">
 {'' if no_canonical else f'<link rel="canonical" href="{canon}">'}

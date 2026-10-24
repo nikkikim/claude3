@@ -12,7 +12,8 @@
     for (var i = 0; i < btns.length; i++) {
       btns[i].setAttribute('aria-pressed', btns[i].dataset.setLang === l ? 'true' : 'false');
     }
-    if (persist) { try { localStorage.setItem('lang', l); } catch (e) {} }
+    // English on every new visit; a choice made here only lasts for this visit (tab)
+    if (persist) { try { sessionStorage.setItem('lang', l); } catch (e) {} }
   }
 
   document.addEventListener('click', function (e) {
@@ -21,6 +22,7 @@
     setLang(t.dataset.setLang, true);
   });
   setLang(root.lang, false);
+  try { localStorage.removeItem('lang'); } catch (e) {}      // an older version remembered the language for good
 
   // dark / light
   function setTheme(t, persist) {
